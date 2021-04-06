@@ -1,0 +1,255 @@
+			   
+
+
+
+
+
+
+
+
+
+
+
+
+	      Williams Electronics Z-Unit Video Hardware System
+	      -------------------------------------------------
+
+
+		    Revision 1 DMA - Description and Use   
+
+
+	     Copyright (c) 1988 Williams Electronics Games, Inc.
+			    All Rights Reserved
+
+			      George N. Petro
+
+	General Description
+	-------------------
+
+		The Z-UNIT DMA is used to do very rapid serial to block
+	data conversions, from image RAM/ROM to the video bitmap.  The
+	DMA has its own 32-bit wide bus for the transfer.  Once it is
+	given the GO signal the GSP is no longer required.  However image
+	RAM/ROM and the video bitmap are "locked-out" for the duration
+	of the DMA operation.  The DMA is also equipped with the ability
+	to flip and clip the block image, along with constant color
+	substitution etc.
+
+	DMA Registers
+	-------------
+
+		The DMA has ten 16-bit registers to control a serial
+	to block transfer. Below they are listed with their physical
+	address and mnemonic. Put these mnemonics in your SYSINC.ASM file.
+
+	Mnemonic   Physical Addr.    	Description	
+	--------   -------------	-----------
+	DMACTL	     >01A80000		Control Register
+	DMAOFS	     >01A80010		Offset Register
+	DMASLO	     >01A80020		Source Data address, LSW
+	DMASHI	     >01A80030		Source Data address, MSW
+	DMAHOR	     >01A80040		Horizontal Destination Address (X)
+	DMAVRT	     >01A80050		Vertical Destination Address (Y)
+	DMAHSZ	     >01A80060		Horizontal Size (0 - >1FF)
+	DMAVSZ	     >01A80070		Vertical Size (0 - >FF)
+	DMAPAL	     >01A80080		Palette Select
+	DMACON	     >01A80090		Constant Color Register
+
+	Control Register
+	----------------
+
+		The DMA performs any given operation based on the
+	control register. Currently the control register uses 7 of its
+	16 bits to define the operation, they are as follows:
+
+		        CONTROL REGISTER
+			-----------------
+	 15	     5			         0
+	 ____	     ____ ____ ____ ____ ____ ____
+	|    | ...  |    |    |    |    |    |  --+--> Write Zero Data
+	 -+--	     -+-- -+-- -+-- -+-- -+-- ----
+	  |	      |    |    |    |    |----------> Write Non-Zero Data
+	  |	      |    |    |    |
+	  |	      |	   |    |    |---------------> Write Constant on Zero Data			
+	  |	      |	   |    |
+	  |	      |	   |    |--------------------> Write Constant on Non-Zero Data
+	  |	      |	   |
+	  |	      |	   |-------------------------> Flip about Y-axis
+	  |	      |
+	  |	      |------------------------------> Flip about X-axis
+	  |
+	  |------------------------------------------> DMA GO bit
+
+	Write Zero Data	- Bit 0
+	-----------------------
+		If Bit 0 of the control register is set then any source
+	data that is zero will be written, otherwise it will not.
+
+	Write Non-Zero Data - Bit 1
+	---------------------------
+		If Bit 1 is set then all non-zero source data will be
+	written.
+
+	Note: To write all source data, Bits 0 and 1 should be set
+	      simultaneously.
+
+
+	Write Constant on Zero Data - Bit 2
+	-----------------------------------
+		This will cause the constant byte, at DMACON, to be written
+	in place of any zeros in the source data.
+
+	Write Constant on Non-Zero Data	 - Bit 3
+	----------------------------------------
+		In this case the constant byte will be written in place
+	of any Non-zero source data.
+
+
+	Note: Setting Bits 2 & 0 or Bits 3 & 1, simultaneously, will
+	      cause results for which the hardware department cannot
+	      be held responsible.
+
+
+	Flipping about Y (left to right) - Bit 4
+	----------------------------------------
+		Setting this bit will cause the DMA to flip the source
+	data about the Y-axis, described below.
+
+	Flipping about X (up and down) - Bit 5
+	--------------------------------------
+		Setting this bit will cause the DMA to flip the source
+	data about the X-axis, also described below.
+
+	DMA GO bit - Bit 15
+	-------------------
+		When this bit is set it will initiate the DMA operation.
+	This bit is also used as a DMA Ready flag. Reading a 1 from this
+	bit indicates that the DMA is busy, a 0 indicates DMA ready.
+
+
+
+	Clipping and Flipping
+	---------------------
+
+		These operations use the offset register, a shortened
+	Horizontal size and a modified source data starting address.
+	There are a few equations to help calculate these parameters.
+
+	They make use of the following mnemonics:
+
+	HS	-	Horizontal Size, this is the Horizontal size of
+			 the data displayed on the screen.
+
+	LC	-	Left Clip, this is the number of pixels that are
+			 to be clipped off of the left side of the block
+
+	OF	-	Offset, this is the value that is stored at DMAOFS.
+
+	RC	-	Right Clip, this is the number of pixels that are
+			 to be clipped off of the right side of the block.
+
+	SA	-	Starting address, this is the starting memory address
+			 of the source data.
+
+	TS	-	Total Size, this is the total horizontal size of the
+			 source data. This includes the padded zeros at the
+			 end of each row, so TS mod 4 is always 0.
+
+
+
+	Offset Register
+	---------------
+		The offset is not difficult to comprehend but it can
+	cause a little confusion, so it shall be discussed here.
+	The Horizontal Size register tells the DMA how many pixels(bytes)
+	make up a row. Once the DMA has reached the end of the row it
+	adds the offset to the current source data address to gain access
+	to the beginning of the next row. So if an image is actually 20
+	pixels wide and you wish only to display the first 15 per row,
+	then a 15 is stored in the Horizontal Size register(DMAHSZ) and
+	5 is stored in the offset reg.
+
+		Now for the confusing part. Every image is stored so that
+	the number of pixels per row is evenly divisible by 4. However
+	the visible horizontal size of an image doesn't necessarily abide
+	by this rule. To compensate, images are "padded" with zeros at the
+	end of a row to make them conform. This is the Total Size(TS).
+	The total size is always the number of bytes per row including the
+	padded zeros. If DMAOFS is zero, and DMAHSZ is the number of bytes
+	of actual image data in the row, then the DMA will figure its way
+	to the next row of source data, regardless of padded zeros
+	(see below).  
+
+
+	image_data
+		.byte	>05,>05,>07,>FF,>07,>07,0,0
+  			 |____________________|	|_|
+				   |		 |______ zeros for padding.
+		  		   |
+			  	   |____________________ actual image data.
+
+		Above shows one row of image data, HS = 6 and TS = 8.
+	If this were to be displayed normally(no clipping), a 0 would
+	go in DMAOFS and a 6 in DMAHSZ.  But, if you were to clip the last
+	pixel of image data, you would set up like this: DMAHSZ = 5,
+	DMAOFS = 3.
+
+	The general idea is then:
+
+			     if	not clipping --> OF = 0
+			     if	clipping     --> OF = TS - HS
+
+
+	Right Clipping (decreased HS)
+	----------------------------
+
+		HS = HS - RC
+		OF = TS - HS
+			
+	Left Clipping (decreased HS, increased SA)
+	-------------------------------------------
+
+		HS = HS - LC
+		OF = TS - HS
+		SA = SA + (LC*8)
+
+	Right and Left Clipping
+	-----------------------
+
+		HS = HS - (RC + LC)
+		OF = TS - HS
+		SA = SA + (LC*8)
+
+	Flipping about Y	
+	----------------
+
+		(DMACTL)Bit 4 = 1
+		(DMACTL)Bit 5 = 0
+
+		HS = HS - (RC + LC)
+		OF = HS + TS - 1
+		SA = SA + ((HS+LC) * 8)
+
+
+	Flipping about X
+	----------------
+
+		(DMACTL)Bit 4 = 0
+		(DMACTL)Bit 5 = 1
+
+		HS = HS - (RC + LC)
+		OF = -(HS + TS - 1)
+		SA = SA + LC*8 + ((TS*8)(VS-1))
+
+
+	Flipping about X & Y
+	--------------------
+
+		(DMACTL)Bit 4 = 1
+		(DMACTL)Bit 5 = 1
+
+		HS = HS - (RC + LC)
+		OF = (HS - TS) - 1
+		SA = SA + ((TS*8)(VS-1) + (HS+LC)*8)
+
+

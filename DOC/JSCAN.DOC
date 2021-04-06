@@ -1,0 +1,6 @@
+jscan is just a dummy checker that scans .asm files for CALLR's to functions
+not defined in that module.  It's fast.  Just put it in your make.ini file,
+after preasm but before GSPA, and have it run on the .axx output of preasm.
+I've put a modified make.ini file in here as an example.
+
+

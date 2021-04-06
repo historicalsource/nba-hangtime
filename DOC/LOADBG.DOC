@@ -1,0 +1,61 @@
+
+
+This document is an addendum to the FAX document describing the layout
+of the background files, *.bdb and *.bdd.
+
+The primary concern of this addendum is to clear up an error in the 
+original document.
+
+=========================================================================
+
+
+The .BDB (Block) file layout is as described originally...
+
+
+First line...
+
+	(ASCII)	NAME xlength ylength zlength numMods numPals numBlocks
+
+
+Module Definitions follow of the form...
+
+	(ASCII)	NAME upper_lft_x lower_rt_x upper_lft_y lower_rt_y 
+	(There are numMods of these)
+
+
+Block Definitions follow of the form...
+
+	(ASCII)	univ_Z univ_X univ_Y Hdr Palette
+	(There are numBlocks of these)
+
+
+
+The .BDD (Data) file begins with an ASCII line
+
+	(ASCII)	number_of_images
+
+For each image there is a header 
+
+	(ASCII)	old_hdr width height big_pal
+
+
+Image data and palette information follow.
+
+========================================================================
+
+
+There has been some confusion about the Hdr field in the
+Block Definition.  Also the original document stated that the
+old_hdr field of the image header could be ignored.  This is not so.
+
+The Hdr field of the block definition will match the old_hdr field of
+one of the image headers.
+
+To find which image is associated with a block, you must scan
+through the image headers until you find one whose old_hdr
+field matches the Hdr field of the block you are working on.
+
+The index of that header is the image index.
+
+
+

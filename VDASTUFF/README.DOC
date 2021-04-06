@@ -1,0 +1,105 @@
+
+Mark,
+
+    Here are the steps I used to load the zipped Ultimate MK3
+    title screen into program memory. I originally got the file called
+    ULT.VDA
+
+;------------------------------------------------------------------
+
+
+1. Convert ULT.VDA into a zipped BIN file called ULT.BIN by
+   running Warren's batch file called VDA2FRM.BAT which calls:
+
+        PKZIPO.EXE  (you must use this old version of PKZIP)
+        ZIP2BIN.EXE (converts pkzips output to a BIN file)
+
+;------------------------------------------------------------------
+
+
+2. Make an LOD file which includes your BIN file in PROGRAM memory
+   My LOD file (mkgmil.lod) looked like this:
+
+;
+;  mk3: program area pics
+;
+***> ffe78000     <-------- note: this is PROGRAM area I chose
+ASM> MK3ZIP.TBL   <----- table file created with LABEL: ULT
+FRM> ULT
+
+      ^
+      |
+      |_____ ULT is the binary file created with Warrens batch file
+
+
+
+;------------------------------------------------------------------
+
+
+3. Include the LOD file in your "Make game roms" batch file
+   This is my batch file to create my game program ROMS It uses the
+   "learn" file: mk3groms.lrn
+
+
+@echo off
+copy d:main.out
+srec < mk3groms.lrn
+copy /b mainf8.0 + mainfa.0 + mainfc.0 + mainfe.0 mk3.0
+copy /b mainf8.1 + mainfa.1 + mainfc.1 + mainfe.1 mk3.1
+erase mainf*.0
+erase mainf*.1
+
+
+   This is the "learn" file which I described.
+   Note: mkgmil.irw is included along with main.out which
+   basically included the zipped picture in the program rom
+   space.
+
+
+
+*****
+ff800000
+
+2
+
+c:\video\supermk3\img\mkgmil.irw      <----- mkgmil is the GAME space IRW
+main.out
+
+
+
+
+a
+
+
+;------------------------------------------------------------------
+
+
+4. Running Loadimg with the MKGMIL.LOD file created a file called
+   MK3ZIP.TBL which contains:
+
+
+	.DATA
+ULT	.set	0ffe78000h
+	.TEXT
+
+
+   You must include this file in your code so you can point the
+   unzipper routine to the address of the zipped picture.
+
+
+
+;------------------------------------------------------------------
+
+5. In your program call the unzipper like dis:
+
+
+         clr	a10			; a10 = coordiantes to use
+	movi	ULT,a8			;  a8 = address of zipped picture
+	jsrp	movie_run
+
+
+;------------------------------------------------------------------
+
+
+                       Ed
+

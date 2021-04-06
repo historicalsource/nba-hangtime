@@ -1,0 +1,20 @@
+L1.1  ->  M1.1
+--------------
+AUDIT.ASM    1) Version string
+
+DIAG.ASM     1) PIC # location comments
+             2) ROM checksums
+
+PLYR2.ASM    1) Jamie ball-code bug
+
+RECORD.ASM   1) Pts/game world record fix
+             2) <dec_to_asc2> call added to correct hi-score leading-zero
+               after the decimal problem
+
+SELECT4.ASM  1) Commented unref'd .refs
+
+STRING.ASM   1) <dec_to_asc2> routine added
+
+GAME.EQU     1) CMOS PKDxx .equs updated
+             2) NUM_PRECORDS comments for 8K/32K CMOS support
+             3) NUM_PRECORDS reduced from 410 to 195 for 8K CMOS support

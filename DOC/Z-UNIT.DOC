@@ -1,0 +1,122 @@
+			   
+
+
+
+
+
+
+
+
+
+
+
+
+	      Williams Electronics Z-Unit Video Hardware System
+	      -------------------------------------------------
+
+
+		           System Specifications
+
+
+	     Copyright (c) 1988 Williams Electronics Games, Inc.
+			    All Rights Reserved
+
+
+
+			   Z-UNIT SPECIFICATIONS
+			   ---------------------
+
+	Address 	Description
+	(in hex)
+	---------	-------------------------------------------------
+
+	FFFF FFFF
+	FFC0 0000	PROGRAM MEMORY
+
+	03FF FFFF
+	0200 0000	IMAGE MEMORY
+
+	01F0 0000	SYSTEM CONTROL REGISTER (see below)
+
+	01E0 0000	SOUND INTERFACE
+
+	01D0 0000	reserved for future use
+
+	01C0 0020	COIN DOOR INPUTS
+	01C0 0010	JOYSTICK INPUTS #2
+	01C0 0000	JOYSTICK INPUTS #1
+
+	01B0 0000	reserved for future use
+
+	01A0 0090	DMA CONSTANT REGISTER
+	01A0 0080	OBJECT PALETTE REGISTER
+	01A0 0070	DMA VERTICAL SIZE REGISTER
+	01A0 0060	DMA HORIZONTAL SIZE REGISTER
+	01A0 0050	DMA DESTINATION ADDRESS REGISTER (Y-COORDINATE)
+	01A0 0040	DMA DESTINATION ADDRESS REGISTER (X-COORDINATE)
+	01A0 0030	DMA SOURCE ADDRESS REGISTER (MSW)
+	01A0 0020	DMA SOURCE ADDRESS REGISTER (LSW)
+	01A0 0010	DMA OFFSET REGISTER
+	01A0 0000	DMA CONTROL REGISTER (see below)
+
+	0180 FFFF
+	0180 0000	COLOR RAM
+
+	0140 3FFF
+	0140 0000	CMOS BACKED UP MEMORY
+
+	010F FFFF
+	0100 0000	SCRATCH PAD RAM
+
+	001F FFFF
+	0000 0000	VIDEO RAM (BIT MAP) [Object Palette when enabled]
+
+
+
+
+	DMA CONTROL REGISTER
+	--------------------
+
+	15  14	13  12	11  10	 9   8	 7   6	 5   4	 3   2	 1   0
+	 |  \__________  ____________/	 |   |	 |   |	 |   |	 |   |
+	 |	       \/		 |   |	 |   |	 |   |	 |   |
+         |      For Software Use.        |   |   |   |   |   |   |   |
+	 |				 |   |	 |   |	 |   |	 |   |
+	 |----> DMA GO (READ / WRITE)	 |   |	 |   |	 |   |	 |   |
+					 |   |	 |   |	 |   |	 |   |
+	      / Enable X Cycle         <-|   |	 |   |	 |   |	 |   |
+	     |	Enable Internal ROM    <-----|	 |   |	 |   |	 |   |
+	     |	Flip About X Axis      <---------|   |   |   |   |   |
+	WRITE|	Flip About Y Axis      <-------------|	 |   |	 |   |
+	ONLY |	Write Constant Non-Zero<-----------------|   |	 |   |
+	     |	Write Constant on Zero <---------------------|	 |   |
+	     |	Write Non-Zero Data    <-------------------------|   |
+	      \ Write Zero Data        <-----------------------------|
+
+
+	SYSTEM CONTROL REGISTER
+	-----------------------
+
+	15  14	13  12	11  10	 9   8	 7   6	 5   4	 3   2	 1   0
+	 |   |	 |   |	 |   |	 |   |	 |   |	 |   |	 |   |	 |   |
+	 a   b	 c   d	 e   f	 g  dp	 |   |	 |   |	 |   |	 |   |
+	 \____________	_____________/	 |   |	 |   |	 |   |	 |   |
+		      \/		 |   |	 |   |	 |   |	 |   |
+		 LED SEGMENTS	 	 |   |	 |   |	 |   |	 |   |
+		 (active low)		 |   |	 |   |	 |   |	 |   |
+	      / Must Always =1 <---------|   |	 |   |	 |   |	 |   |
+	     |	Must Always =1 <-------------|	 |   |	 |   |	 |   |
+	     |	Obj Pal EN=0   <-----------------|   |	 |   |	 |   |
+	WRITE|	AutoErase EN=0 <---------------------|	 |   |	 |   |
+	ONLY |	Must Always =1 <-------------------------|   |	 |   |
+	     |	Must Always =1 <-----------------------------|	 |   |
+	     |	Watch Dog Data <---------------------------------|   |
+	      \ Watch Dog Clk  <-------------------------------------|
+
+
+
+
+
+
+
+

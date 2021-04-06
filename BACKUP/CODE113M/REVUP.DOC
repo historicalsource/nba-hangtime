@@ -1,0 +1,12 @@
+10/11/96
+
+
+Here is the list of the changes from NBA Hangtime version M1.2 to
+version M1.3:
+
+  1) Free full-game on power-up for players 1 & 2 bugfix;
+     produced if a player pressed a start button within the first
+     8 ticks (1/7 second) of entry to Attract mode following power-up
+     Version screen; then, while still on Credits screen, player
+     would drop enough to start a game, thereby allowing players 1 & 2
+     to press start for a free full-game

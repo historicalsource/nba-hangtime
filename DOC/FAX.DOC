@@ -1,0 +1,434 @@
+Jamie,
+
+	We chaned the ball boundary check so that it brings the ball back
+	inbounds when it finds itself out of bounds.  This solves the bug
+	where the ball can somehow glitch off of the rim into a wild x
+	range, sometimes off screen!
+
+	We also put in a passfudgecnt variable that solves the problem
+	of players not being able to pick up a loose ball.  The players all
+	thought the ball was a pass still enroute to a receiver, however
+	the receiver was impeeded and could not get into position to receive
+	the pass.  Now, as soon as the ball hits a boundary, it clears the
+	pass receive process pointer after 5 ticks.  This tick countdown
+	happens in the main loop like all the others...
+
+
+;----------
+; check ball X coor limits
+
+;DJT Start
+	move	*a8(OXPOS),a6		;Add ani X to check ball center
+	move	*a13(ball_anix),a14
+	add	a14,a6
+
+	move	@ballpnum,a5		;Ball owned? Yes if >=0
+	jrge	#zok
+
+	move	*a8(OXVEL),a1,L
+	cmpi	LFTCRT_X,a6		;Chk left X limit
+	jrlt	#xlow
+	cmpi	RGTCRT_X,a6		;Chk right X limit
+	jrle	#xok
+
+	move	a1,a1
+	jrlt	#xok
+	movi	RGTCRT_X,a6		;Too far. Pull it back & go 0 X vel
+	jruc	#xbad
+#xlow
+	move	a1,a1
+	jrp	#xok
+	movi	LFTCRT_X,a6		;Too far. Pull it back & go 0 X vel
+#xbad
+	.asg	5,PASSFUDGECNT
+	BSSX	passfudge,16
+
+	move	@ballprcv_p,a1,L
+	jrz	#xnop
+	movk	PASSFUDGECNT,a1
+	move	a1,@passfudge
+#xnop
+;DJT End
+	move	a6,a5			;(OXPOS+anix) wants to remain in A6
+	sub	a14,a5			;Adjust for ani X
+	move	a5,*a8(OXPOS)
+	clr	a1
+	move	a1,*a8(OXVEL),L		;Clr X vel
+#xok
+
+;----------
+; check ball Z coor limits
+
+;DJT removed
+	move	*a8(OZPOS),a0		;No
+	move	*a8(OZVEL),a1,L		;Chk vel for which limit to chk
+	jreq	#zok			;No chk if not moving
+	jrgt	#zvpos
+
+	cmpi	CZMIN,a0		;Neg vel. Chk upper Z limit
+	jrge	#zok
+	movi	CZMIN,a0		;Too far. Pull it back & go 0 Z vel
+	jruc	#zbad
+
+#zvpos	cmpi	CZMAX-2,a0		;Pos vel. Chk lower Z limit
+	jrlt	#zok
+	movi	CZMAX-2,a0		;Too far. Pull it back & go 0 Z vel
+
+;DJT Start
+#zbad
+	move	@ballprcv_p,a1,L
+	jrz	#znop
+	movk	PASSFUDGECNT,a1
+	move	a1,@passfudge
+#znop
+;DJT End
+	move	a0,*a8(OZPOS)
+	clr	a1
+	move	a1,*a8(OZVEL),L		;Clr Z vel
+#zok					;(ballpnum) wants to remain in A5
+
+
+
+
+
+Jamie,
+
+	This is the fudegecnt tick counter...
+
+
+
+mainpok
+
+	move	@RAND,a1,L		;>Randomize
+	rl	a1,a1
+	move	@HCOUNT,a14
+	rl	a14,a1
+	add	sp,a1
+	move	a1,@RAND,L
+
+	calla	cr_cntrs_update		;And blink the top messages
+	callr	switch_unstack
+	calla	snd_update		;Update the sound calls
+	calla	joy_read
+
+;DJT Start
+	.ref	passfudge
+	.ref	ballpnum
+	move	@passfudge,a0
+	jrle	#fok
+	subk	1,a0
+	move	a0,@passfudge
+	jrnz	#fok
+	move	@ballpnum,a14
+	jrnn	#fok
+	move	a0,@ballprcv_p,L
+ .if DEBUG
+	LOCKUP
+ .endif ;DEBUG
+#fok
+;DJT End
+	move	@steals_off,a0
+	jrle	#ok
+	subk	1,a0
+	move	a0,@steals_off
+;DJT Start
+
+
+
+
+
+
+
+
+
+Jamie,
+
+	These are the new values for a spin move...
+
+
+See-ya.........  Hit a few balls for us...
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	.asg	24000h,XVEL_15		;24000h
+	.asg	58000h,ZVEL_15		;50000h
+	.asg	5a400h,XVEL_37		;52000h
+	.asg	22000h,ZVEL_37		;22000h
+	.asg	47500h,XVEL_2468	;40D00h
+	.asg	49f00h,ZVEL_2468	;43300h
+
+;DJT End
+#set_xzvels_d1
+	callr	check_x_bounds
+	jrnc	#sd1
+;DJT Start
+	movi	 XVEL_15,a14
+;DJT End
+	move	*a8(OXPOS),a0
+	cmpi	WRLDMID,a0
+	jrlt	#sd11
+;DJT Start
+	movi	-XVEL_15,a14
+;DJT End
+#sd11	move	a14,*a8(OXVEL),L
+
+#sd1	callr	check_z_bounds
+	jrnc	#sd1a
+;DJT Start
+	movi	-ZVEL_15,a14
+;DJT End
+	move	a14,*a8(OZVEL),L
+#sd1a	rets
+
+
+#set_xzvels_d1a
+	callr	check_x_bounds
+	jrnc	#sd1b
+;DJT Start
+	movi	-XVEL_15,a14
+;DJT End
+	move	*a8(OXPOS),a0
+	cmpi	WRLDMID,a0
+	jrlt	#sb12
+;DJT Start
+	movi	 XVEL_15,a14
+;DJT End
+#sb12	move	a14,*a8(OXVEL),L
+
+#sd1b	callr	check_z_bounds
+	jrnc	#sd1c
+;DJT Start
+	movi	-ZVEL_15,a14
+;DJT End
+	move	a14,*a8(OZVEL),L
+#sd1c	rets
+
+
+#set_xzvels_d2
+	callr	check_x_bounds
+	jrnc	#sd2a
+;DJT Start
+	movi	 XVEL_2468,a14
+;DJT End
+	move	a14,*a8(OXVEL),L
+
+#sd2a	callr	check_z_bounds
+	jrnc	#sd2b
+;DJT Start
+	movi	-ZVEL_2468,a14
+;DJT End
+	move	a14,*a8(OZVEL),L
+#sd2b	rets
+
+
+#set_xzvels_d3
+	callr	check_x_bounds
+	jrnc	#sd3a
+;DJT Start
+	movi	 XVEL_37,a14
+;DJT End
+	move	a14,*a8(OXVEL),L
+
+#sd3a	callr	check_z_bounds
+	jrnc	#sd3b
+;DJT Start
+	movi	 ZVEL_37,a14
+;DJT End
+	move	a14,*a8(OZVEL),L
+#sd3b	rets
+
+
+#set_xzvels_d3a
+	callr	check_x_bounds
+	jrnc	#sd3c
+;DJT Start
+	movi	 XVEL_37,a14
+;DJT End
+	move	a14,*a8(OXVEL),L
+
+#sd3c	callr	check_z_bounds
+	jrnc	#sd3d
+;DJT Start
+	movi	-ZVEL_37,a14
+;DJT End
+	move	a14,*a8(OZVEL),L
+#sd3d	rets
+
+
+#set_xzvels_d4
+	callr	check_x_bounds
+	jrnc	#sd4a
+;DJT Start
+	movi	 XVEL_2468,a14
+;DJT End
+	move	a14,*a8(OXVEL),L
+
+#sd4a	callr	check_z_bounds
+	jrnc	#sd4b
+;DJT Start
+	movi	 ZVEL_2468,a14
+;DJT End
+	move	a14,*a8(OZVEL),L
+#sd4b	rets
+
+
+#set_xzvels_d5
+	callr	check_x_bounds
+	jrnc	#sd5a
+;DJT Start
+	movi	 XVEL_15,a14
+;DJT End
+	move	*a8(OXPOS),a0
+	cmpi	WRLDMID,a0
+	jrlt	#sd51
+;DJT Start
+	movi	-XVEL_15,a14
+;DJT End
+#sd51	move	a14,*a8(OXVEL),L
+
+#sd5a	callr	check_z_bounds
+	jrnc	#sd5b
+;DJT Start
+	movi	 ZVEL_15,a14
+;DJT End
+	move	a14,*a8(OZVEL),L
+#sd5b	rets
+
+
+#set_xzvels_d5a
+	callr	check_x_bounds
+	jrnc	#sd5c
+;DJT Start
+	movi	-XVEL_15,a14
+;DJT End
+	move	*a8(OXPOS),a0
+	cmpi	WRLDMID,a0
+	jrlt	#sb52
+;DJT Start
+	movi	 XVEL_15,a14
+;DJT End
+#sb52	move	a14,*a8(OXVEL),L
+
+#sd5c	callr	check_z_bounds
+	jrnc	#sd5d
+;DJT Start
+	movi	 ZVEL_15,a14
+;DJT End
+	move	a14,*a8(OZVEL),L
+#sd5d	rets
+
+
+#set_xzvels_d6
+	callr	check_x_bounds
+	jrnc	#sd6a
+;DJT Start
+	movi	-XVEL_2468,a14
+;DJT End
+	move	a14,*a8(OXVEL),L
+
+#sd6a	callr	check_z_bounds
+	jrnc	#sd6b
+;DJT Start
+	movi	 ZVEL_2468,a14
+;DJT End
+	move	a14,*a8(OZVEL),L
+#sd6b	rets
+
+
+#set_xzvels_d7
+	callr	check_x_bounds
+	jrnc	#sd7a
+;DJT Start
+	movi	-XVEL_37,a14
+;DJT End
+	move	a14,*a8(OXVEL),L
+
+#sd7a	callr	check_z_bounds
+	jrnc	#sd7b
+;DJT Start
+	movi	 ZVEL_37,a14
+;DJT End
+	move	a14,*a8(OZVEL),L
+#sd7b	rets
+
+
+#set_xzvels_d7a
+	callr	check_x_bounds
+	jrnc	#sd7c
+;DJT Start
+	movi	-XVEL_37,a14
+;DJT End
+	move	a14,*a8(OXVEL),L
+
+#sd7c	callr	check_z_bounds
+	jrnc	#sd7d
+;DJT Start
+	movi	-ZVEL_37,a14
+;DJT End
+	move	a14,*a8(OZVEL),L
+#sd7d	rets
+
+
+#set_xzvels_d8
+	callr	check_x_bounds
+	jrnc	#sd8a
+;DJT Start
+	movi	-XVEL_2468,a14
+;DJT End
+	move	a14,*a8(OXVEL),L
+
+#sd8a	callr	check_z_bounds
+	jrnc	#sd8b
+;DJT Start
+	movi	-ZVEL_2468,a14
+;DJT End
+	move	a14,*a8(OZVEL),L
+#sd8b	rets
+
+
+;-----------------------------------------------------------------------------
+;-----------------------------------------------------------------------------
+ SUBRP	check_x_bounds
+
+	move	*a8(OXPOS),a0
+	move	*a8(OXANI+16),a14
+	add	a14,a0
+	cmpi	PLYRMINX,a0		;Is X ok? Yes if >
+	jrle	#stp			;br=dont allowed furter movement
+	cmpi	PLYRMAXX,a0		;Is X ok? Yes if <
+	jrge	#stp			;br=dont allowed furter movement
+	setc	
+	rets
+#stp
+	clrc	
+	rets
+
+;-----------------------------------------------------------------------------
+;-----------------------------------------------------------------------------
+ SUBRP	check_z_bounds
+
+	move	*a8(OZPOS),a0
+	cmpi	CZMIN+8,a0
+	jrle	#czb
+	cmpi	CZMAX-6,a0
+	jrge	#czb
+	setc	
+	rets
+#czb
+	clrc	
+	rets
+
+
+	.end
+#ok

@@ -1,0 +1,29 @@
+;**************************************************************
+;
+;  mk3: program area pics
+;
+;**************************************************************
+;***> ffdf0000
+***> ffe78000
+ASM> MK3ZIP.TBL
+FRM> ULT
+FRM> E_KAN
+FRM> E_SON
+FRM> E_JAX
+;FRM> E_IND
+;FRM> E_SUB
+;FRM> E_COP
+;FRM> E_LIA
+;FRM> E_SEK
+;FRM> E_CYR
+;FRM> E_LAO
+;FRM> E_KAB
+;FRM> E_SHE
+;FRM> E_SHA
+;FRM> E_LIU
+;FRM> E_SMK
+;FRM> GODS
+
+
+
+

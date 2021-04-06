@@ -1,0 +1,21 @@
+9/3/96
+
+
+Here is the list of the changes from NBA Hangtime version L1.1 to
+version M1.2:
+
+  1) Grand Champion leading-space initials crash bugfix
+
+  2) Watchdog failure during CPU board SRAM check bugfix
+
+  3) Watchdog & Process KO auditing bugfix
+
+  4) Points per Game world record bugfix
+
+  5) Hi-score decimal followed by a zero display problem bugfix
+
+  6) "DIPSWITCH TEST SELECT" message corrected
+
+  7) Ball-to-player detection improved
+
+  8) NUM_PRECORDS reduced from 410 to 195 for 8K CMOS support

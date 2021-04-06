@@ -1,0 +1,225 @@
+NOTES ON THE NEW WIMP (Remember, this is only the BEGINNING!)
+
+
+General Rule...
+	Right Click OR ESCAPE  to exit a mode or cancel what
+					you're doing
+	Left Click OR ENTER to take action or select something
+
+Also...
+	In old WIMP, you usually clicked on an image or palette and
+	then on the function you wanted to perform.  In new WIMP, you
+	click on the function first, and then select as many images
+	or palettes as you want until you ESCAPE from that mode.
+
+Notable Exception...
+	When you are in a color selection mode (Modify Colors, Color
+		Cycle, Pixel Replace, etc.)  Left Click selects
+		the first or source color, Right Click selects the
+		destination or last color.
+
+Key things...
+	Cursor keys move the cursor just as the mouse would.
+	Shift-Arrow keys moves the cursor in greater chunks
+
+	ENTER is same as left click
+	ESCAPE is same as right click
+
+	Home, End, Delete, and Page Down move the DRAW COLOR box
+		around the color block.  This works even if the color
+		block is not displayed.
+
+	Grey Plus increments the source color
+		EXCEPT in Modify Color Range when it adjusts 
+			R,G and B simultaneously
+	Grey Minus decrements the source color
+		EXCEPT in Modify Color Range when it adjusts 
+			R,G and B simultaneously
+	
+On the target screen only...
+	CTRL-Left Click  selects the pixel you are pointing at as the
+			DRAW color
+	CTRL-Right Click selects the pixel you are pointing at as the
+			ERASE color
+
+When you are changing animation points...
+	SHIFT-RIGHT CLICK restores the animation point to where it was 
+			originally.  NOTE: Once you leave the target
+			screen, the animation point becomes fixed and can
+			not be restored to an earlier state!
+
+When loading images...
+	SHIFT-Left Click allows you to drop multiple copies and even
+		paint with the image.
+
+
+SOME COOL NEW FEATURES...
+	Stronger communication with GSP.
+	Checking for disk space before writing to disk.
+	Clean entering and exiting target screen without crashes.
+		(See note below)
+	New command lets you restart GSP art program from within WIMP.
+	Mouse sensitivity range for being on target screen.
+	Can have your background and cursor colors automatically set
+		when you start WIMP.
+	New function: ADD COLORS TO A PALETTE! (increases the number
+		of colors in the palette so you can set up color animations
+		or just put in some additional colors. This does not set
+		the new colors, just increases the number of colors
+		associated with the palette)
+	Extract feature automates the creation of many images from one
+		large one. (and sets animation points for you)
+	Messages on console telling you what mode you're in.
+	For the Img/Palette Directory, Sequence/Script Directory, and
+		Draw Mode, you get new Menu Bars so more commands
+		are at your reach easily. 
+	While you make a box, the endpoints and size are constantly
+		displayed and updated.
+	Copy Work area commands work the way you think they should.
+	In ZOOM mode, you can now pan by scrolling the box around instead
+		of pressing directional buttons.	
+	Bulletproof and transparent handling of "out of memory"
+		conditions.
+	Pixel Swap on images added to the pixel replace option.
+	Can create any number of scripts (formerly buffers). Still can
+		only see 4 at a time, though (for now).
+	Read Multiple VDA Files at once using only one palette and
+		create a script automatically.
+	Range modify acts like a real tint. You can always go back to 
+		the original state.
+	Animations get reloaded automatically when something relevant 
+		changes.  You should never need a "RELOAD FRAMES" command.
+	File windows give you a better way to create and select files.
+	Images, Palettes, Sequences and Scripts can all be "marked" for
+		Range operations.
+	Marking can be by name, position, or (for images) by palette.
+	You can mark unused palettes.
+	Search and replace on image, palette, script or sequence names.
+	Delete a Sequence or Delete a Script without having to delete all
+		the frames inside.
+	Palette List shows which palettes are in the color map and which
+		colors they occupy.
+	When you change colors in the color map, WIMP now detects if those
+		colors are part of a palette and gives you the option of
+		changing the palette or not.
+	Animation point values are displayed with the directory for each
+		image. You can now click on them and type in values if
+		you wish.
+	You can change the animation points on a RANGE of images by
+		either setting them to a specific value or offsetting 
+		them by a constant value.		
+	Sequence and script editing is easier.
+	Condense now gives you the option of stopping after identical
+		and unused colors are removed.
+	True Tinting (and brightness control when R,G, and B are all
+		adjusted together.
+	Anim pts are now transferred with .VDA files between Wimp and Wtarg
+	Merge Function merges any number of palettes into one.
+	Can load images larger than screen size. (Wimp breaks them up into
+		smaller images)
+	Can load .VDA files containing 24-bit color maps.
+	Can place as many images on screen as will fit with one click.
+	Can place all parts of multi part images on screen at once.   
+	Modify Colors now has an UNDO function which lets you to go
+		back to the state you were in when you selected the
+		current range or color.
+	Shadow options allow you to create a new separate shadow image.
+
+*****************************************************
+*   IF YOUR SYSTEM SEEMS TO BE HUNG UP...           *
+*****************************************************
+
+	...wait a few seconds.  You should get a flashing message that
+	says "GSP timed out on..."  Make a note of the seemingly cryptic
+	numbers at the end of the message, then hit ESCAPE or Right click
+	to remove it.  
+
+	WIMP NOW TRIES TO RESEND A TIMED OUT COMMAND!
+
+	If you get another of the same message, repeat the procedure.
+
+	If you keep getting the same message, PRESS and HOLD BOTH
+	MOUSE BUTTONS AT THE SAME TIME after you clear the flashing 
+	message.  At this point...
+	1) You may be alive again.  Try to do something. (don't be scared)
+	2) You may time out again.
+	3) you may get an "I'M CONFUSED" message when you try to go to
+		the target screen.
+
+	At any point, you should be able to save your work and exit
+	WIMP.  If you find you are still alive, just keep going.
+	Before you give up, there is a last resort that may get you
+	going without a problem. It is the "RESTART GSP" Command in the
+	first menu (at the left of the menu bar).  If that doesn't work,
+	you may have to save your work and restart WIMP.  It is extremely
+	unlikely that you will crash so severely that you lose work!
+
+
+
+EDITING KEYS...
+
+	When editing a field, the following keys may be used...
+
+	HOME	gets you to beginning of field
+	END	gets you to end of field
+	DEL	deletes char at cursor without moving cursor
+	BKSPC	deletes char before cursor and moves cursor left 1 space
+	SHFT_LFTARR	moves cursor left on space
+	SHFT_RTARR	moves cursor right on space
+	INS	toggles between Overwrite (default) and
+			 Insert (Cursor flashes) modes 
+	TAB	clears field from current position to end
+	ESC  	exits and restores original field
+	ENTER	exits and accepts changes to field
+
+IGNORE	When more than one field are present...
+IGNORE
+IGNORE	LFTARR	moves to next field
+IGNORE	RTARR	moves to prev field
+IGNORE	UPARR	moves to field above
+IGNORE	DNARR   moves to field below
+IGNORE	SHFT_UPARR,PGUP		increments field
+IGNORE	SHFT_DNARR,PGDN		decrements field
+
+
+STRING MATCHING...
+
+For search strings...
+	*	matches any number of any characters
+	?	matches any one character
+	@	matches any number (>0) of the previous character
+	< or %	anchors the search string to the beginning of
+			 the scanned strings
+	> or $	anchors the search string to the end of
+			 the scanned strings
+	[...]	encloses a set.  A set is a set of characters
+		to match or a range of chars to match.
+		EXAMPLES:  [1a2b] will match a single occurance
+			   of 1, a, 2, or b
+			   [a-e] will match a single occurance of
+			   a, b, c, d, or e
+			   [*?] will match an asterisk or question mark
+			   since they normally would be reinterpreted
+ 			   as wildcards.
+
+
+For translation strings...
+	^	will be replaced with the source string.
+
+		i.e.  if the source string was [1-9] and the
+		replacement string is :^:  then the following translations
+		take place...
+			FUCK1      becomes	FUCK:1:
+			FUCK2	   becomes	FUCK:2:
+			B7TMP	   becomes	B:7:TMP
+
+
+
+
+
+ENVIRONMENTAL VARIABLES...
+
+IMGDIR=directory where .img files are
+VDADIR=  "        "    .vda files are
+TMP=directory where you want temp. files to be created (RAM disk if you have one);
+

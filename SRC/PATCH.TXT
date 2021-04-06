@@ -1,0 +1,12 @@
+
+P PLYR2       3562 FF912AC0         LOCKUP
+	nop
+
+P BB           560 FF8A8BE0         LOCKUP
+	nop
+
+P PLYR2       3001 FF9105D0         LOCKUP
+	nop
+
+P PLYR2       5091 FF918020         LOCKUP
+	nop

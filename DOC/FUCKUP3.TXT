@@ -1,0 +1,14 @@
+This is a fairly consistent problem anytime I try to use conditional breakpoints,
+esp. when disabling & re-enabling one! Course I'm still using v1.0. Fixed? - DJT
+
+PSY_WIN caused an invalid page fault in
+module KERNEL32.DLL at 0137:bff79249.
+Registers:
+EAX=f00003c6 CS=0137 EIP=bff79249 EFLGS=00010202
+EBX=000003e5 SS=013f ESP=006ef7f4 EBP=006ef850
+ECX=000003c4 DS=013f ESI=00000000 FS=0df7
+EDX=00000000 ES=013f EDI=00810000 GS=0000
+Bytes at CS:EIP:
+8b 02 25 fc ff ff 0f 8d 5a 08 03 c8 8d 42 04 8b 
+Stack dump:
+006ef850 00000047 041ab530 000003e5 00000000 0043d078 00810000 00000000 041ab530 00964620 00000001 0000004a 0043c7ba 041ab530 00418183 041ab530 

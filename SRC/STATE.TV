@@ -1,0 +1,69 @@
+MEM
+	@sp
+	sp
+	a10
+	a0
+	a4
+MEMV
+	1
+STRCT
+	PALRAM PAL *
+	*OBJLST OBJ OLINK
+	*BAKLST OBJ OLINK
+	*ACTIVE PROC PLINK
+STRCTV
+	>FFAC36A0
+REG
+	>FFFFFFFF
+	>00000000
+VREG
+	tm2_random_team_nbr
+	tm1_random_team_nbr
+	tm2_random_cycle_cnt
+	tm1_random_cycle_cnt
+	team2_control
+	team1_control
+	team2
+	team1
+	switch_map_mode
+	plyr_tourn
+	adj_cksum
+SRCH
+	WARMSET
+	SORT_OFF
+	METHOD6
+	METHOD4
+	PRINT_PLAYING_RANK
+	DEC_2_A
+	DEC_TO_ASC
+PTCH
+	jruc $
+	nop
+FILE
+	util
+	test
+	select
+	screen
+	plyrat
+	plyr
+	ndsp1
+	menu
+	makeplr
+	hstd
+	bb2
+	bb
+	record
+	string
+GOLI
+	9999
+VIEW
+	.tbl
+	.map
+	.hlp
+	.equ
+	.asm
+COLSRCH
+	>0000
+SRCWRD
+	S
+	W

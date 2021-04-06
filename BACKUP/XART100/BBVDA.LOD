@@ -1,0 +1,5 @@
+;Memory ceiling for LOAD2 is $fffff000 (512 bytes below top)
+***> fff6ba30
+ASM> BBVDA.TBL
+FRM> CHEERS
+;FRM> TROPHY

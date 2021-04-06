@@ -1,0 +1,55 @@
+Combo #'s on Versus Screen
+--------------------------
+
+025  Baby-sized players
+048  Music off during game play
+111  Tournament mode - no powerups allowed
+120  Fast turbo passes powerup
+273  Stealth turbo powerup - no shoe color change
+284  Maximum speed attribute powerup
+390  No pushing allowed powerup
+461  Infinite turbo powerup
+552  Huper turbo speed powerup
+616  Shot blocking powerup
+709  Maximum steal attribute powerup
+802  Maximum power attribute powerup
+937  Goal tending allowed powerup
+
+If a game has a humam v. human, both sides must enter the
+same combo # for it to be active. The exception is the 111
+tournament mode combo - any one player can enter that one.
+
+
+Joystick/Button Combos on Versus Screen
+---------------------------------------
+
+          D - Lock combo #'s
+      u+t+p - Big head
+    U,U,P,T - Huge head
+    u+S,u+S - Show hotspots
+        UoU - Show shot percentage
+    L,L,P,T - No tag arrows
+    D,D,S,T - No drift jump powerup
+    r+P,r+P - No computer assistance powerup
+r+S,r+T,r+P - ABA ball
+    l+T,l+T - Outdoor court
+  S,S,s+UoU - Special combo
+
+U=press Up     D=press Down   L=press Left   R=press Right
+u=hold up      d=hold down    l=hold left    r=hold right
+
+P=press Pass   S=press Shoot  T=press Turbo
+p=hold pass    s=hold shoot   t=hold turbo
+
++=at the same time
+o=clockwise swirl from first direction to second
+
+
+Special Combos
+--------------
+Pass button by selecting player on Team Select changes
+Rodman's hair color
+
+When outdoor court is selected, hold joystick U+R when
+exiting the Versus screen to show an MK vortex in the sky
+above the right hoop

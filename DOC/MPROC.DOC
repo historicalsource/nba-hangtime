@@ -1,0 +1,290 @@
+KILL                                                                      KILL
+
+Description: Kill one process
+
+------------------------------------------------------------------------------
+         
+Input:           A0 --> process structure to kill
+
+Returns:         none
+
+Found in:        MPROC.ASM
+
+------------------------------------------------------------------------------
+
+Comments:
+
+*
+*KILL PROCESS
+*A0 POINTS TO PROCESS TO KILL
+*IF PROCESS NOT PRESENT, CAUSES ERROR
+*TO KILL YOURSELF SUCIDE MUST BE USED,
+*IF YOU ATTEMPT TO KILL YOURSELF IT WILL JUST RETURN
+*
+KILL:	
+        CMP	A0,A13		;KILLING YOURSELF?
+	JREQ	KILLXXX		;BR = YES, JUST ESCAPE
+	MMTM	SP,A1,A2
+	MOVI	ACTIVE,A1,L
+KILLP:	
+	MOVE	A1,A2       	;SAVE PREVIOUS
+	MOVE	*A1,A1,L
+	JRNZ	KILLCHK
+
+	LOCKUP
+
+*	CALLERR	2		;LOG THE ERROR
+*	JRUC	KILLX
+KILLCHK
+	CMP	A1,A0
+	JRNE	KILLP		;NOT FOUND KEEP LOOKING
+	MOVE	*A0,*A2,L	;LINK AROUND IN ACTIVE LIST	
+	MOVE	@FREE,A1,L	;LINK INTO FREE LIST AT START
+	MOVE	A1,*A0,L
+	MOVE	A0,@FREE,L
+KILLX
+	MMFM	SP,A1,A2
+KILLXXX
+	RETS
+
+GETPRC                                                                  GETPRC
+
+Description: Create a process
+
+------------------------------------------------------------------------------
+         
+Input:           A1 = ID
+                 A7 = starting PC address
+                 A8-A11 passed to new process
+
+Returns:         A0 --> created process
+
+Found in:        MPROC.ASM
+
+------------------------------------------------------------------------------
+
+Comments:
+
+*
+*CREATE A PROCESS
+*A1=ID,A7=PC,A8,A9,A10,A11 PASSED PARAMETERS
+*A13=CURRENT PROCESS
+*A0 IS RETURNED POINTING TO CREATED PROCESS
+*
+GETPRC:	
+	MMTM	SP,A2,A12
+ 	MOVE	@FREE,A0,L
+	JREQ	GETPX		;NONE AVAILABLE
+	MOVE	*A0,A2,L 
+	MOVE	A2,@FREE,L	;REMOVE FROM FREE LIST
+	MOVE	*A13,*A0,L	;LINK INTO ACTIVE LIST AFTER CURRENT PROCESS
+	MOVE	A0,*A13,L	;CRPROC>>NEW PROC
+         JRUC 	XFERPRC0
+
+XFERPROC                                                              XFERPROC
+
+Description: Transfer control of an existing process
+
+------------------------------------------------------------------------------
+         
+Input:           A0 --> process to be transfered
+                 A1 = new i.d.
+                 A7 = wake up address
+                 A8-A11 = passed to process
+
+Returns:         none
+
+Found in:        MPROC.ASM
+
+------------------------------------------------------------------------------
+
+Comments:
+
+* XFERPROC - TRANSFER CONTROL OF AN EXISTING PROCESS
+* A0 = PTR OF PROCESS TO BE XFER'D
+* A1 = NEW I.D.
+* A7 = WAKE UP
+* A8 - A11 = PASSED TO THE XFER'D PROC
+
+XFERPROC
+	mmtm	SP,A2,A12
+XFERPRC0
+	MOVE	A0,A2
+	ADDI	PDATA,A2		
+	move	A0,A12			;RESET PROCESS STACK POINTER
+	addi	PRCSIZ,A12
+	MMTM	A2,A7,A8,A9,A10,A11,A12	;STUFF wake, regs, p stack ptr
+	movk	1,A12
+	move	A12,-*A2,W		;WAKE UP AS SOON AS POSSIBLE
+	move	A1,-*A2,W		;ID
+GETPX
+	mmfm	SP,A2,A12
+	RETS
+
+KILALL                                                                  KILALL
+
+Description: Kill a class of processes
+
+------------------------------------------------------------------------------
+         
+Input:           A0 = I.D. to kill
+                 A1 = mask bits (zeros are "don't care" bits)
+
+Returns:         none
+
+Found in:        MPROC.ASM
+
+------------------------------------------------------------------------------
+
+Comments:
+
+*
+*KILL A CLASS OF PROCESSES
+*A0=PROCID (16 BITS) ,A1=MASK (16 BITS)
+*MASK BITS OF ZERO ARE DONT CARES
+*WILL NOT KILL CALLING PROCESS (A13)
+*
+KILALL:	
+	MMTM	SP,A0,A1,A2,A3,A4,A5
+	AND	A1,A0		;FORM MATCH
+	MOVI	ACTIVE,A2,L
+
+KILALP:	
+	MOVE	A2,A3		;SAVE PREVIOUS
+	MOVE	*A2,A2,L	;GET NEXT
+	JREQ	KILALX		;ALL DONE
+	MOVE	*A2(PROCID),A4
+	AND	A1,A4		;CAN DONT CARE BITS
+	CMP	A0,A4		;MATCH?
+	JRNE	KILALP		;NO
+
+	CMP	A2,A13		;CURRENT PROCESS?
+	JREQ	KILALP		;YES DONT KILL
+
+	MOVE	*A2,*A3,L	;LINK AROUND IN ACTIVE LIST	
+	MOVE	@FREE,A5,L	;LINK INTO FREE LIST AT START
+	MOVE	A5,*A2,L
+	MOVE	A2,@FREE,L	;POINT FREE TO CELL
+	MOVE	A3,A2
+	JRUC	KILALP		;KILL THE REST
+KILALX:	
+	MMFM	SP,A0,A1,A2,A3,A4,A5
+	RETS
+
+EXISTP                                                                  EXISTP
+
+Description: Find at least one process other than calling process
+
+------------------------------------------------------------------------------
+         
+Input:           A0 = I.D. to kill
+                 A1 = mask bits (zeros are "don't care" bits)
+
+Returns:         A0 = pointer to process (Zero bit clear)
+                        or
+                 A0 = 0 (no match) Zero bit set
+
+Found in:        MPROC.ASM
+
+------------------------------------------------------------------------------
+
+Comments:
+*
+*FIND IF AT LEAST ONE PROCESS, OTHER THAN CALLING PROCESS,
+*EXISTS.
+*A0=PROCID (16 BITS) ,A1=MASK (16 BITS)
+*MASK BITS OF ZERO ARE DONT CARES
+*RETURNS:
+* Z BIT SET = NO MATCH, A0 = 0
+* Z BIT CLR = MATCH,	A0 = PTR TO PROCESS
+*
+EXISTP:	
+	MMTM	SP,A1,A2,A4
+         SEXT    A0,W
+	AND	A1,A0		;FORM MATCH
+	MOVI	ACTIVE,A2,L
+
+EXNXT:	
+	MOVE	*A2,A2,L	;GET NEXT
+	JREQ	EXSC		;ALL DONE
+	MOVE	*A2(PROCID),A4
+	AND	A1,A4		;CAN DONT CARE BITS
+	CMP	A0,A4		;MATCH?
+	JRNE	EXNXT		;NO
+
+	CMP	A2,A13		;CURRENT PROCESS?
+	JREQ	EXNXT		;YES, THEN WE DON'T CARE
+EXSC
+	MOVE	A2,A0
+	MMFM	SP,A1,A2,A4
+	RETS
+
+GET8                                                                      GET8
+GET9
+GET10
+GET11
+
+Description: Get a preserved register from a sleeping process
+
+------------------------------------------------------------------------------
+         
+Input:           A0 --> sleeping process
+
+Returns:         A8,A9,A10, or A11 = preserved value
+
+Found in:        MPROC.ASM
+
+------------------------------------------------------------------------------
+
+Comments:
+*GET A PRESERVED REGISTER FROM A SLEEPING PROCESS
+*A0 = PTR TO SLEEPER
+
+GETA11	move	*A0(PA11),A11,L
+	RETS
+GETA10	move	*A0(PA10),A10,L
+	RETS
+GETA9	move	*A0(PA9),A9,L
+	RETS
+GETREGS
+	move	*A0(PA11),A11,L
+	move	*A0(PA10),A10,L
+	move	*A0(PA9),A9,L
+GETA8	move	*A0(PA8),A8,L
+	RETS
+
+PUT8                                                                      PUT8
+PUT9
+PUT10
+PUT11
+
+Description: Store a value into a sleeping process' register store area
+
+------------------------------------------------------------------------------
+         
+Input:           A0 --> sleeping process
+
+Returns:         none
+
+Found in:        MPROC.ASM
+
+------------------------------------------------------------------------------
+
+Comments:
+
+PUTA11	move	A11,*A0(PA11),L
+	RETS
+PUTA10	move	A10,*A0(PA10),L
+	RETS
+PUTA9	move	A9,*A0(PA9),L
+	RETS
+PUTREGS
+	move	A11,*A0(PA11),L
+	move	A10,*A0(PA10),L
+	move	A9,*A0(PA9),L
+PUTA8	move	A8,*A0(PA8),L
+	RETS
+PUTA7
+PUTWAKE	move   	A7,*A0(PWAKE),L
+	RETS
+

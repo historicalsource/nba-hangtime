@@ -1,0 +1,68 @@
+***> 5000000,1
+IHDR SIZX:W,SIZY:W,ANIX:W,ANIY:W,SAG:L,CTRL:W,PAL:L
+ZON>
+CON>
+POF>
+;********************************************************************
+;
+;  More floor images
+;
+;********************************************************************
+PPP> 6
+ZOF>
+ASM> MKFLOOR2.TBL
+FRM> FL_CAVE
+FRM> FL_HELL
+FRM> FL_DESER
+ZON>
+;********************************************************************
+;
+;  Backgrounds
+;
+;********************************************************************
+;PPP> 6
+PPP> 0
+GLO> BGNDTBL.GLO
+BBB> c:\video\supermk3\img\nubuyin
+BBB> c:\video\supermk3\img\steelvs
+BBB> c:\video\supermk3\img\mknuport
+;BBB> c:\video\supermk3\img\fireport
+;BBB> c:\video\supermk3\img\mkcoinpg
+;BBB> c:\video\supermk3\img\mklost
+;BBB> c:\video\supermk3\img\nupalsel
+;********************************************************************
+BBB> c:\video\supermk3\img\mkcave
+BBB> c:\video\supermk3\img\mkhades
+BBB> c:\video\supermk3\img\mkwater
+BBB> c:\video\supermk3\img\mkdesert
+BBB> c:\video\supermk3\img\mkcity
+BBB> c:\video\supermk3\img\mksubraw
+BBB> c:\video\supermk3\img\mk3soul
+BBB> c:\video\supermk3\img\mkstreet
+BBB> c:\video\supermk3\img\mkbridge
+BBB> c:\video\supermk3\img\mkbell
+BBB> c:\video\supermk3\img\mkbell2
+BBB> c:\video\supermk3\img\mktemp2
+BBB> c:\video\supermk3\img\mkgrave
+BBB> c:\video\supermk3\img\mkthrone
+BBB> c:\video\supermk3\img\mkbalc2
+;********************************************************************
+;BBB> c:\video\supermk3\img\mkbank
+;BBB> c:\video\supermk3\img\mkshao1
+;BBB> c:\video\supermk3\img\mkshao2
+;BBB> c:\video\supermk3\img\mkladder
+;BBB> c:\video\supermk3\img\mk3coin
+;BBB> c:\video\supermk3\img\mk3end
+;BBB> c:\video\supermk3\img\mkselect
+;BBB> c:\video\supermk3\img\mkhidden
+;BBB> c:\video\supermk3\img\mktext
+;BBB> c:\video\supermk3\img\mk3bio
+;BBB> c:\video\supermk3\img\widebox
+;************************************************************************
+COF>
+PPP> 0
+ASM> MK9MIL.TBL
+C:\video\supermk3\img\boonpics.img
+---> ENDMARKER
+
+

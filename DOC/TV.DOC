@@ -1,0 +1,428 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+	      Williams Electronics Z-Unit Video Software System
+	      -------------------------------------------------
+
+
+		       ToddView source level debugger
+
+
+	     Copyright (c) 1988 Williams Electronics Games, Inc.
+			    All Rights Reserved
+
+			       Todd R. Allen
+
+
+
+	Description
+	-----------
+
+		The ToddView debbuger is a source level debugger, that
+	actually lets you debug a TMS34010 assembly language program
+	using your own source code.  It is aimed at aiding in the
+	development of video games and has many functions that follow
+	the programming design here at Williams.
+
+	Invoking ToddView
+	-----------------
+
+		TV <filename>
+
+	ENVIRONMENT VARIABLES
+	---------------------------------------------------------------------
+
+	MWPATH....path to find GDBG.OUT, TV.HLP, and font files.
+	MWCARD....Graphics card used by system.
+		8  -> Hercules 720x348 mono
+	MWMOUSE...Mouse used by system.
+		32 -> MicroSoft Mouse (bus)
+		16 -> MicroSoft Mouse (serial)
+	MWFONT....Name of font file to be used.
+		system08.fnt
+	MWEXIT....If set to the name of a command, this command will be
+		executed each time TV puts the graphics card into text mode,
+		DOS escape, HELP, BLST, and when TV exits. This variable
+		is optional, and only useful if you need to specially reset
+		your graphics card before entering text mode.
+	
+
+
+KEYBOARD COMMANDS  when GSP is halted and REGISTERS and code are being viewed.
+------------------------------------------------------------------------------
+ALT_X.....Halt GSP, Clear all BreakPoints and EXIT.
+CTL-C.....EXIT (doesn't clear break points, leaves GSP running).
+
+'?','H','h',ALT_H
+...........HELP, opens up this file in VIEW mode.
+
+PageUp, PageDown keys
+{up, down, left, right, CTL-left, CTL-right} Arrow keys
+...........SCROLL text.  CTL key makes arrow keys go faster.
+HOME, END..Go to top and bottom of file.
+ALT_G......When looking at a .lst file - GO to LINE #.
+     ......When looking at disassembled code - GO to ADDRESS.
+ALT_E......Open and or change to another source file.
+ALT_N......Go to next file that is already open.
+'m','M'....Toggle the MODE of a file between listing and disassembled.
+ALT_P......Display text at current Program counter.
+ALT_F......FIND a Label.
+ALT_S, F5..SEARCH for a string in a .lst file. '%' matches start of line.
+CTL-A, ^F5.SEARCH again for same string as last search.
+
+'g','G'...Start GSP running from current PC.
+'s','S',<CR>
+..........Single Step one instruction, following flow of control.
+'l','L', ALT_L
+..........Single Step one line, skip over call statements.
+'t','T'...Set Temporary Break Point at Cursor Line, starts GSP.
+CTL-PgUp, CTL-PgDown
+'u','U','d','D'
+...........Move CURSOR LINE up or down 1 line.
+'p', 'P'...Make a PATCH at Cursor Line. (see "MAKING PATCHES" for details)
+'b', 'B'...Toggle a BREAK POINT at Cursor Line (none->temp->perm->none).
+ALT_B......Display next Break Point.
+ALT_C......CLEAR all Break Points.
+
+ALT_A......Run AGAIN, Resets PC, SP (use ALT_P to update display).
+ALT_D......DISPLAY Memory.
+ALT_K......KILL (reset) the sound board.
+ALT_M......Leave BookMARK by scroll bar.
+ALT_V......VIEW an ascii file.
+ALT_Z......Start a DOS command.com, type 'exit' to return.
+CTL-B......Enter George's BLIST program to display NARC data structures.
+CTL-D......DUMP Registers, Ram, Palette Ram to a disk file.
+CTL-L......LOAD Registers, Ram, Palette Ram from a disk file.
+CTL-R......Enter A REGISTER command.  Command has following format: 
+	<REG>---display memory at contents of <REG>.
+	*<REG>--display memory at dereferenced contents of <REG>.
+	{<REG> | *<REG>} =
+		{<REG> | *<REG> | >hex# | hex#H | dec# | SYMBOL}
+	where <REG> is 
+		{A0-A15 | B0-B15 | SP | PC | ST | ADD | NCZV | V2-V20}
+
+KEYBOARD COMMANDS  in file VIEW mode
+------------------------------------------------------------------------------
+ESC, ALT_V, 'q', 'Q'
+...........EXIT File View Mode.
+U_ARROW, D_ARROW, PGUP,	PGDN
+...........SCROLL text up and down.
+HOME, CTL-PGUP
+...........Go to TOP of file.
+END, CTL-PGDN
+...........Go to BOTTOM of file.
+ALT-G......GO to a line #.  (Not Yet)
+ALT_S, F5..Search for a string. '%' matches start of line. (Not Yet)
+ALT_A, ^F5.Search again for same string as last search.	   (Not Yet)
+
+
+KEYBOARD COMMANDS  when editing a string in a response box.
+------------------------------------------------------------------------------
+ESC........ESCAPE, abort command.
+HOME.......Go to start of string.
+END........Go to End of string.
+INSERT.....Toggle between TypeOver and Insert modes.
+DEL........Delete character at cursor.
+BackSpace..Delete character before cursor.
+L_ARROW....move cursor 1 left.
+R_ARROW....move cursor 1 right.
+U_ARROW....Loads Previous Responses.
+D_ARROW....Loads Next Responses.
+ALT_U......Load original contents of response box.
+(note - any other first keystroke but the above will delete initial string)
+
+
+KEYBOARD COMMANDS  in DISPLAY MEMORY Mode
+------------------------------------------------------------------------------
+ESC, 'q', 'Q', ALT_X
+...........EXIT display memory mode.
+'?','H','h',ALT_H
+...........HELP, opens up this file in VIEW mode.
+HOME,END...Select Previous,Next memory TYPE.
+	Memory types are three charachters,
+	  char1 = U|S -> Unsigned|Signed
+	  char2 = H|D -> Hex|Decimal
+	  char3 = L|W|B -> Long|Word|Byte
+ARROWS.....Move Memory Word Cursor.
+PGUP, PGDN.Page up, down through address space.
+CTL-PGUP, CTL-PGDN
+...........Line up, down through address space.
+CTL-L_ARROW.Move back through memory by size of TYPE selected.
+CTL-R_ARROW.Move forward through memory by size of TYPE selected.
+'m','M',<CR>
+............Modify the memory word at the cursor.
+'i','I'....Indirect through memory.  Word at cursor is least significant.
+
+ALT_V......VIEW an ascii file.
+ALT_Z......Start a DOS command.com, type 'exit' to return.
+CTL-B......Enter George's BLIST program to display NARC data structures.
+CTL-D......DUMP Registers, Ram, Palette Ram to a disk file.
+CTL-L......LOAD Registers, Ram, Palette Ram from a disk file.
+CTL-R......Enter A REGISTER command.  Command has following format: 
+
+KEYBOARD COMMANDS  in DISPLAY STRUCTURE Mode
+------------------------------------------------------------------------------
+ESC, 'q', 'Q', ALT_X
+...........EXIT display structure mode.
+'?','H','h',ALT_H
+...........HELP, opens up this file in VIEW mode.
+HOME,END...Go to TOP/BOTTOM of structure.
+ARROWS.....Move structure field cursor.
+CTL-L_ARROW.Go to first field of current element.
+CTL-R_ARROW.Go to last field of current element.
+CTL-PGUP, CTL-PGDN
+PGUP, PGDN.Page up, down through structure elements.
+'m','M',<CR>
+............Modify the field at the cursor.
+ALT_C.......Search for a Column (offset name)
+ALT_S.......Search for a value in a column.
+	    Starts at highlighted value and searches down.
+
+
+KEYBOARD COMMANDS  while GSP is RUNNING
+------------------------------------------------------------------------------
+ALT_P......Stops GSP and displays text at PC.
+ANY other key stops the GSP without changing the text display.
+
+MOUSE COMMANDS  when GSP is halted and REGISTERS and code are being viewed.
+------------------------------------------------------------------------------
+The following buttons are encased in rectangles on the screen.
+   Clicking on them has the following effects.
+SS.........Single Step one line, skip over call statements.
+P..........Display text at current Program counter.
+UP, DN.....Scroll text.
+LIST/DASM..Toggle the MODE of a file between listing and disassembled.
+(SCROLL BAR).Go to corresponding position in File.
+F..........Select a source File to change to.
+DM.........Display Memory.
+S..........Search for a string of text in the source code.
+RST........Resets PC and SP to allow program to be run Again.
+SND........Kill (reset) the SOUND board.
+BLST.......Enter George's BLIST program to display NARC data structures.
+M..........Leave a bookMark in the file.  Click on bookmark to remove it.
+AUTO.......Starts GSP running in automatic interrupt mode.
+DOS........Escape to DOS command interpreter.  'exit' to return to TV.
+HALT.......Exits debugger and stops GSP.
+QUIT.......Exits with GSP running.
+HELP.......HELP enter VIEW mode on this stuff here.
+DMSG.......Print TV self debug messages. Should be of no interest to the user.
+Clicking on a LINE of CODE moves the cursor bar to that line.
+   Using the left button toggles a break point, while the right does not.
+   Use both buttons to make a patch at that line.
+Click on a register to modify it.
+Click on the '*' by a register to indirect through it to the memory display.
+The boxes to the right of the code are virtual registers.
+   Click on the 1st box to enter an address or symbol.
+   Click on the 2nd box to change value of what's at the address or symbol.
+   The third box toggles the symbol size (Long, Word, Byte)
+   The fourth box toggles the symbol mode (Hex, Decimal, Address)
+
+
+MOUSE COMMANDS  in memory display mode
+------------------------------------------------------------------------------
+Click and hold both buttons down to EXIT.
+Click Left button on any word to modify it.
+Click Right button on any word to indirect through it.
+   The word pointed at is the most significant of the address.
+Click on any memory TYPE to set that type.
+Visible buttons have same actions as listed above.
+
+MAKING PATCHES
+------------------------------------------------------------------------------
+'P' will start a patch at the cursor bar.
+Clicking both mouse buttons together on any line will start a patch at
+   that line.
+<ESC> - will ABORT the patch.
+A patch can be any of the following:
+   A GSP assembly instruction.
+      Operands can be decimal #s, hex #s with leading '>' or trailing 'H',
+      any global symbol or a local label.
+   A LABEL local to the current file.
+      The label must have a trailing ':' to be recognized.
+   .byte #, .word #, .long #
+   "INSERT", "APPEND"
+      Enter INSERT or APPEND mode.  Instead of the patch overwriting the
+      code at the same address, it is placed in the address space defined
+      by the symbols TVPATCH, TVPATCHX.  This code is transparently made
+      to execute as if it were inserted or appended to the line that
+      was originally being patched.  TRAP 28 is used to transfer control
+      to the patch.  TRAP 27 is used to transfer control from the patch.
+      PATCHING a TRAP 27 or TRAP 28 once placed may cause unpredictable
+      results, although the line before or after the TRAP may be patched.
+      INSERT/APPEND is terminated by entering "Q" for the next instruction.
+	
+  (if a patch line is not understood, it won't be entered and it remains on
+	the edit line to be modified.)
+
+INSERT and APPEND patches require an entry in a statically allocated table,
+there is currently only 100 entries in this table all though this may be
+increased in the future if it seems insufficient.
+
+START UP FILE
+------------------------------------------------------------------------------
+   Each time TV is invoked on a file "blah", it checks for a file named
+"blah.tvs" in the current directory and if it is not found it checks
+again for "blah.tvs" in the directory specified by the environmental
+variable "MWPATH".
+
+The start up file can contain the following commands:
+
+.tab N
+	Set Tab expansion of text to N columns per tab.
+
+.struct	filename
+	Open file "filename" and scan for structure definitions of the
+	following format:
+		*struct structname     (this must start in column 1)
+		fieldname1  .set  <offset>  ;[<TYPE>]
+		fieldname2  .set  <offset>  ;[<TYPE>]
+		  .
+		  .
+		*endstruct
+	<offset>: <term>[<operand><term>]...
+	   a <term> is either a hex or decimal 16 bit or less value, or
+		it can be the name of a previously defined offset.
+		If it is an offset name, it can be in the same structure
+		or a different one, but it must have already been defined.
+	   an <operand> is either '+' or '-'.
+	   Don't put white space in between terms and operands.
+	<TYPE>
+	Memory types are three charachters,
+	  char1 = U|S -> Unsigned|Signed
+	  char2 = H|D -> Hex|Decimal
+	  char3 = L|W|B -> Long|Word|Byte
+	Structures can be displayed from the display memory command.
+	The fields can also be referenced when making patches.
+	If a field type is unspecified it will not be displayed in the
+	structure display.  The field will still be known to the assembler.
+
+
+.bp <GLOBAL SYM | ADDRESS>
+	Sets a breakpoint at address or symbol.
+
+.wp <GLOBAL SYM | ADDRESS>,[L|W|B],[H|D|A]
+	Sets up a watch point to always display the value of the symbol.
+	[L|W|B] optionally specifies symbol to be
+		L -> long word (32 bits)
+		W -> word
+		B -> byte
+	[H|D|A] optionally specifies symbol be displayed as a
+		H -> Hex Value 
+		D -> Decimal Value
+		A -> Address of a Symbol
+
+.km <KEY KEY-SEQUENCE>
+	Defines a keymap of KEY to KEY-SEQUENCE.
+	KEY is any single keystroke which is to be interpreted as
+	   the sequence of keys in KEY-SEQUENCE.
+	**NOTE** Bindings to AlphaNumeric Keys are not expanded when
+	   in editing a string mode.
+	The keys of KEY-SEQUENCE are not reinterpreted through any keymaps.
+	The following characters are meta-chars:
+		'^' -> control,   i.e. '^C' = control C
+		'@' -> alternate, i.e. '@C' = alt C
+		'!' -> function,  i.e. '!F1' = shifted function key 1
+				  i.e. '!f1' = unshifted function key 1
+		'\' -> literal, key following this key is accepted literally
+				  i.e. '\^' = '^'
+				  i.e. '\\' = '\'
+		'"' -> named-key, i.e. "PGUP" = key with code of 0x8000|73
+			following keys are known by name:
+			"CR"	= Carriage Return,
+			"BS"	= BackSpace,
+			"ESC"	= Escape
+			"PU"	= Page Up,
+			"PD"	= Page Down
+			"^PU"	= Control Page Up
+			"^PD"	= Control Page Down
+			"HOME"	= Home
+			"END"	= End
+			"^HOME"	= Control Home
+			"^END"	= Control End
+			"DEL"	= Delete
+			"INS"	= Insert
+			"R->"	= Right Arrow
+			"L->"	= Left Arrow
+			"D->"	= Down Arrow
+			"U->"	= Up Arrow
+			"^R->"	= Control Right Arrow
+			"^L->"	= Control Left Arrow
+	*** SAMPLE KEYBINDING TO DISPLAY STRUCT OBJ WITH f1 Key ***
+	.km !f1 @D*OBJLIST\ OBJ\ OLINK"CR"
+
+
+';', '*', '/'  Appearing as the first character of a line,
+	marks the line as a comment to be ignored.
+  
+NOTES 
+------------------------------------------------------------------------------
+   If system appears hung, try CTL-Q which will cause any attempts
+to communicate with a crashed GSP to be aborted.  This can cause
+the state of the system to get screwed up if communications weren't
+hung.
+
+   To use debugger with incrementally linked files, the file type
+of partially linked relocatable objects must be ".rlo" so that
+the debugger knows to open up the corresponding ".map" file to get
+information on files, sections and symbols for the members of those
+objects.
+
+TV loads a GSP resident piece of code "GDBG.OUT" that requires
+address space from >FFFF0000 through >FFFFFC00
+
+TV uses the following INTERRUPT VECTORS and redefines them if
+the users program loads with them initialized.
+   TRAP 8  - NMI used to stop/start the GSP
+   TRAP 30 - Illegal Opcode
+   TRAP 29 - BreakPoint
+   TRAP 28 - Go to Patch Code
+   TRAP 27 - Exit Patch Code
+
+TV gets control from the GSP using traps and interrupts.   These push
+the status word and program counter on the stack.  If the stack pointer
+(SP) points at unreadable or unwriteable memory the debugger will lose
+these values and can even lose control of the GSP entirely...
+
+When TV gets control from the GSP, it first disables interrupts
+then if the users program has a global label TVBP defined, it
+will call that routine.  Before TV returns control to the users
+program, if a global label TVBPX is defined TV will call that
+routine also.
+
+The program "crnchlst.exe" can be run on listing files to crunch
+them into a more compact format.  This will roughly halve the
+size of your listing files, and double the speed of TV when it is
+operating on those files.  To crunch all files in a directory, enter
+"crnchlst *.lst".  Files already crunched will be ignored.
+
+These are statically allocated structures in TV.EXE, here
+are their sizes and purposes.
+MAX_FILES	80		maximum # of listing files. 	
+MAX_VIEWS	50		max # opened view files (ALT-V).
+MAX_GLOBALS	2500		maximum # of global symbols.
+GBLS_CHARS	16000		maximum # characters of global symbol names.
+MAX_LOCALS	500		max # of local symbols per file.
+LOCALS_CHARS	6000		max # chars of local symbol names per file.
+MAX_LINES	2048		MAX_LINES*SKIP_LINES is roughly the maximum
+SKIP_LINES	25		   number of lines of opened listings.
+PATCHTBLLEN	100		max # of (insert/append) patches per session.
+MAX_STRUCTMEM	500		max # of members per structure definition
+MAXSTRUCTNAME	4096		max # chars of member names per struct def.
+MAX_STRUCTS	50		max # of structure definitions.
+MAX_KEYMAPS	100		max # of keymap definitions
+MAX_KEYCHARS	1000		max # of characters in keymap key sequences.
+
+
+
+
+

@@ -1,0 +1,248 @@
+   *************
+   *  LOAD2    *       This information is contained in LOAD2.HLP
+   *************
+
+   Description of the .lod file...
+
+   1)   There should be no blank lines or stray spaces.
+   2)   Any line beginning with ';' or  '/' is considered a comment
+        and ignored.
+   3)   The first four columns of each non-comment line are checked to see
+        if they are a valid keyword.  (see below)
+   4)   If they are not, then the line is assumed to contain a WIMP .img
+        filename.  (If no directory is supplied, then IMGDIR is assumed)
+        There is no limit on the number of .img files which can be contained
+        in the .lod file.
+
+ ***********************************************************************
+ *   KEYWORDS are 4 characters long and should be followed by a space. *
+ *   They are processed sequentially so that they take effect when     *
+ *   they are encountered and stay in effect until another line        *
+ *   overrides it later in the .lod file.			       *
+ ***********************************************************************
+
+---> img1[:stcol][*{2-4}],img2[:stcol][*{2-4}],...,imglast[:stcol][*{2-4}]
+
+        This keyword starts a list of images which are assumed to be in
+        the previously supplied .img file.
+
+        The stcol field is optional and denotes an offset into the color
+        palette for each non-zero pixel in the image. 
+
+        The asterisk is optional and tells load2 to create multiple sizes of 
+        the image for scaling purposes.  The digit following the asterisk tells '
+	load2 how many sizes to make.   (full, half, qrtr and eighth)
+        In this case, multiple image headers are created sequentially,
+        but only one label is created for all of them.
+
+***> hex_address[,end_address][,bank]
+
+        This keyword causes the address counter to skip to the indicated
+        address.  Upon entering load2, the address counter is set to
+        2000000h.  If you specify the optional end_address, load2 checks
+	to see if data fits within the specified range.  Only data which
+	will fit is processed.
+
+	The bank applies only when the /E option is used for dual-banked
+	image memory and can be 0 or 1.  (When omitted, 0 is assumed)
+
+GLO> global_filename
+
+        Causes all subsequent labels to be written to the supplied
+        filename instead of the default, "imgtbl.glo"  This can be
+        changed again by another GLO> line.
+
+ASM> imghdr_filename[,section_name]
+
+        Causes all subsequent image headers to be written to the supplied
+        filename instead of the default, "imgtbl.asm"  This can be changed
+        again by another ASM> line.  The section_name is optional.  If not
+	supplied, a .data line will be inserted at the beginning of the
+	ASM file.
+
+ROM> staddr,endaddr
+
+        This keyword specifies an area of image memory which is NOT to
+        be downloaded to.  This is useful when some area of image
+        memory has been fixed and replaced with ROM.
+        
+PPP> digit 
+
+        This sets the DMA2's pixel packing option.  If digit is 0,
+        (the default), then each image is automatically pixel packed
+        to its smallest size.  If you want to force a specific number of
+        bits per pixel, digit should be a number between 1 and 8.
+
+ZON>
+ZOF>
+
+        These keywords turn DMA2's zero compression on and off.
+        When on, load2 computes the leading and trailing zeros for
+        each line of each image and sets the appropriate bits in the
+        DMA control field of the image header.
+        When off (the default), load2 downloads the data as it always
+        has in the past.
+	Zero compression is AUTOMATICALLY turned off for scaled images!
+
+CON>
+COF>
+
+        These keywords turn checksums on and off.
+        When on (the default), load2 computes a checksum for each image
+        to see if it matches a previous image.  If so, it creates
+        a new image header pointing to the previous data, and does
+        not download the identical data.
+	When off, identical data will be downloaded separately.
+
+PON>
+POF>
+
+        These keywords turn the palette entry in the image header on and
+	off when the /T option is in effect.
+        When on (the default), load2 includes the palette field in the
+	image header table (assuming it is part of the IHDR format).
+	When off, the palette field is not included in the image header.
+	THIS IS REALLY OBSOLETE SINCE YOU CAN DO THE SAME THING WITH THE
+	IHDR COMMAND.
+
+XON>
+XOF>
+
+        These keywords turn on extra zero pixels along the right and
+	bottom edge of images so the DMA's scaling computation doesn't
+	truncate them prematurely.
+
+FRM> bin_filename1,bin_filename2,...
+
+        Compressed movie footage is contained in files with a .bin 
+        extension.  These need to be loaded using the FRM> keyword.
+	
+BBB> bg_filename1,bg_filename2,...
+
+        Loads a BLIMP background file.  This causes the following tables
+        to be created when the /T option is in effect...
+                    bgndequ.h, bgndtbl.asm, bgndpal.asm
+
+UFN> uni_file_num
+
+	This is used with the /A option to tell load2 what the starting
+	universe number should be.  Without this line, the starting
+	universe number is 0, which might cause previous universe
+	files to be overwritten.
+
+UGL> user_glo_file
+
+	This sets a file name which will be included in a file that
+	load2 generates. 
+
+	The user_glo_file is one file for all universes which you create
+	and maintain containing	image, sequence and/or damage table names
+	which you want to be global, but are not automatically set to be
+	by load2.  The only reason you are supplying the name here is so
+	load2 can put a .include line in univtbl.glo.
+
+
+UNI> uni_fname[;override_directory][,uni_fname[;override_dir]...]
+
+        Loads a BGTOOL universe file.  The image files contained within
+	the universe file must come from IMGDIR or the override directory
+	(if specified).  The following tables are created when
+	the /T option is in effect...
+		univtbl.glo (for the first UNI> encountered)
+                unixx.asm,uniseqxx.asm,unixx.tbl,univtbl.glo
+
+IHDR FLD1:S,FLD2:S,...,FLDn:S
+
+	The IHDR keyword specifies a format for image headers.
+        FLDx represents a field name, while S represents a size
+	for that field.
+
+	VALID FIELDS ARE LIMITED TO THE FOLLOWING...
+		SIZX	x size
+		SIZY	y size
+		SAG	image address
+		CTRL	DMA2 control field
+		ANIX	x anim pt
+		ANIY	y anim pt
+		PAL	palette name
+		ALT	alternate palettes (if there are any)
+			NOTE: these are terminated with a -1.
+			      If an image has none, a -1 is still placed
+			      in its table.
+		PTnx	Point Table values
+			(n = 0-9   x = X or Y)
+
+	VALID SIZES ARE LIMITED TO THE FOLLOWING..
+		B	.byte
+		W	.word
+		L	.long
+
+
+	A new IHDR line can appear at any time.  If none appears, the
+	default table format is...
+
+	IHDR SIZX:W,SIZY:W,SAG:L,ANIX:W,ANIY:W,CTRL:W,PAL:L
+
+
+
+
+ ***********************************************************************
+ *                                                                     *
+ *      Invocation...	load2 <lod_file> <flags>                       *
+ *                                                                     *
+ ***********************************************************************
+
+      TRGTADDR is the host communication port
+      Source directories for related files can be chosen through flags.
+      YOU CAN SPECIFY AN IMAGE HEADER FORMAT IN THE .LOD FILE!!!
+
+Valid <flags>...
+
+  /X  -DO NOT download to GSP. (If not present, it does)
+  /Dx -Specify directory for .lod file (see below for 'x' description)
+  /Tx -Build image table files (see below for 'x' description)
+  /Fx -Build raw file (see below for 'x' description)
+  /Ox -Override dir. for all files in .lod file (see below for 'x')
+  /Ux -Override dirs. within all Universe files (see below for 'x')
+
+NOTE! The above flags are independent and may be used in any combination.
+
+  /Rx -Load from a raw image file. (see below for 'x' description).
+  /H  -Print an explanation of .lod file directives.
+  /V  -Verbose mode, report lots of stuff.
+  /I  -Write background data to image roms
+  /B  -Make Bits Per Pixel based on Image data, not Palette size
+  /P  -Pad images to multiple of 4 bits
+  /L  -aLign images to 16 bit boundaries
+  /A  -Append to (i.e. do not erase and recreate) default table files.
+  /S  -Write sequences in .uni files to univseq.new
+  /E  -ED adjustment (Dual banked image memory (not available in load20)
+
+The T,F,R,D,O and U options use a secondary flag shown above as 'x'.
+  If x is I, the affected file uses IMGDIR.
+  If x is S, the affected file uses SRCDIR.
+  If x is C, the affected file uses the current dir.
+  If x is =, supply a directory on the command line.
+
+
+
+/********************************************************************
+
+Normally, imgtbl.asm, imgtbl.glo and imgpal.asm are created for writing.
+
+	imgtbl.asm becomes the default ASM file for image headers.
+	imgtbl.glo becomes the default file for .globals.
+	imgpal.asm is where all non-BLIMP palettes are placed.
+
+When the /A option is used for multiple loads...
+	imgtbl.asm is opened for reading, & scanned for image names.
+	imgtbl.glo is opened for appending.
+	imgpal.asm is opened for appending, old palettes are scanned for names.
+
+	AN ASM DIRECTIVE MUST APPEAR AT THE START OF A .LOD FILE WHEN
+	THE /A OPTION IS USED SO THAT IMG HEADERS HAVE SOME PLACE TO GO!!!
+	THE GLO DIRECTIVE IS OPTIONAL.  
+
+***************************************************************************/
+
+

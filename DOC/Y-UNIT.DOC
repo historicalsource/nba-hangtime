@@ -1,0 +1,55 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+	      Williams Electronics Y-Unit Video Hardware System
+	      -------------------------------------------------
+
+
+		             System Description
+
+
+	     Copyright (c) 1989 Williams Electronics Games, Inc.
+			    All Rights Reserved
+
+
+
+	     The Y-Unit video system is the successor to the Z-Unit
+	system that was used in NARC (1989).  The system is designed
+	with cost reduction in mind, without taking away the tremendous
+	horsepower of the Z-Unit.  Based on the Texas Instruments
+	TMS34010 Graphics System Processor, and a custom DMA, Williams
+	has created the most powerful coin-operated video game hardware
+	for the money.  With its single board layout and JAMMA compatible
+	edge connector, it is also competitive in the kit market.
+
+	     The major changes are as follows:
+
+	1)	Reduced image ROM storage from 8 Mb to 2 Mb.
+	2)	Reduced program ROM storage from 512K to 256K.
+	3)	Jumpers to accomodate contiguous storage of images
+		at n bits/pixel.
+
+	     As an added cost savings measure, most games currently
+	under development are using a resolution of 256x395x8 rather
+	than 400x512x16.  This drastically reduces the storage space
+	required for images from ROM to Video RAM.
+
+	     The Y-Unit is theoretically the same as the previous
+	system.  The Z-Unit Theory and Maintenance Manual is a very
+	comprehensive explanation of the ideas behind the hardware
+	operation.  Please refer to this if you wish to explore these
+	ideas in depth.  Included with this document is a system memory
+	map and a description of the revision 1 DMA.  For operation 
+	and programming of the TMS34010 refer to the TMS34010
+	user's guide.
+

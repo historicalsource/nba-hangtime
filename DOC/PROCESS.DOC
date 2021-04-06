@@ -1,0 +1,618 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+	      Williams Electronics Z-Unit Video Software System
+	      -------------------------------------------------
+
+
+		       Multi-Tasking System Description
+
+
+	     Copyright (c) 1988 Williams Electronics Games, Inc.
+			    All Rights Reserved
+
+			      George N. Petro
+
+
+
+	Description
+	-----------
+
+		The Z-Unit software system is designed to allow the
+	programmer maximum flexibility in game program design while
+	adhering to the stringent time requirements of real time
+	execution.  The game program consists of many small routines which
+	may or may not be active at any one time.  These routines are
+	called processes.
+ 
+		Two singly linked lists are maintained by the process
+	system.  A FREE list which ties together all processes available
+	for allocation.  And an ACTIVE list which holds all of the 
+	currently active processes.  The ACTIVE list is traversed once
+	every 16 msec under normal conditions by the main loop.  During
+	this traversal each process is checked to see if it is ready
+	to activate or wakeup.  If it is, then it is called upon to 
+	execute until it gives control back to the main loop by sleeping
+	or dying.  Once the list has been traversed, the main loop
+	waits the remainder of the 16 msec then starts over.
+
+		The process data structure is defined as follows:
+
+			mnem.	description				size
+			-----	-----------				----
+
+			PLINK	- link to the next process in the list. (32)
+			PROCID 	- process I.D.				(16)
+			PTIME   - time until next dispatch.		(16)
+			PSPTR	- process local stack pointer.		(32)
+			PDATA	- process local data storage.		(18x32)
+			PSDATA	- process local stack area.		(24x32)
+
+			
+
+
+	Creating a process
+	------------------
+
+		Before a process can be dispatched, it must first be
+	created.  All of the routines for creation and destruction of
+	processes are contained in a file called xPROC.ASM where x is
+	usually the name of the game or non-existant.  Usually a process
+	is created by another process, in this case it will be the
+	next process to be dispatched.
+
+		GETPRC is the routine which creates the process, it
+	takes the process I.D. in A1 and the process address in
+	A7.  It is used like this:
+
+	       		MOVI	NEW_PROCESS_ID,A1
+	       		MOVI	NEW_PROCESS_ADDR,A7
+	       		CALLA	GETPRC
+
+		The macro call for this is:
+
+			CREATE	 NEW_PROCESS_ID,NEW_PROCESS_ADDR
+
+		If process creation was successful then GETPRC
+	returns, in A0, the pointer to the new process and the Z bit
+	clear.  If there are no more processes available then the
+	Z bit is set and no process is created.
+
+
+
+
+	Sleeping and Dying
+	------------------
+
+		A process must voluntarily give up control of the
+	processor so that other process are allowed to execute.  The
+	process may give up control in one of two ways, by sleeping, or
+	by dying.  Going to sleep means that the process will pause for
+	a specified amount of time and begin executing where it left off.
+	Dying means that the process is finished and wishes to be taken
+	off of the ACTIVE list.
+
+		Go to sleep as follows:
+
+			MOVI	SLEEP_TIME,A0	;# of 16 msec "ticks" to sleep
+			CALLA	PRCSLP		;sleep
+			.			;continue executing
+			.
+			.
+
+		The macro calls for this are:
+
+			SLEEP	SLEEP_TIME	;sleep constant
+			SLEEPR	Ax		;sleep register
+			SLEEPM	@MEM_LOC,FIELD	;sleep memory
+
+		When a process goes to sleep its wakeup address and
+	registers A8 - A11 are pushed onto the process stack and the
+	process stack pointer (A12) is stored at PSPTR.  All other
+	registers are not guaranteed during any sleep.
+
+		Upon wakeup, the process stack pointer is restored to
+	A12 and registers A8 - A11 are pulled off of the process stack
+	along with the wakeup address.  Control is then transferred to 
+	the process.
+		
+		Die as follows:	
+
+			JAUC	SUCIDE		;Jump never to return
+
+		The macro call for this is:
+
+			DIE
+
+
+
+	Calling a subroutine which sleeps
+	---------------------------------
+
+		First of all, a subroutine that sleeps may be called
+	only by an active process.  If the process wishes to call one
+	of these subroutines it must first push the return address
+	onto the process stack then jump to the routine.  JSRP is the
+	macro which will handle this action.  A subroutine which is
+	called with JSRP must use the macro RETP to return, or pull
+	the return address from the process stack and jump there.
+
+		Example:
+
+			PROCESS_1:
+				MOVK	1,A0
+				SLL	16,A0
+				MOVY	A1,A0		
+				JSRP	SLEEP_SUB
+				DIE
+
+			SLEEP_SUB:
+				ADD	A1,A0
+				SLEEP	1
+				RETP
+
+
+	Note: Only calls to subroutines that sleep, require JSRP and
+	      RETP. All other calls may be made normally.	
+
+
+
+	The Process I.D. (PROCID)
+	-------------------------
+
+		The Process I.D. is a 16 bit value used to distinguish
+	processes from one another.  For the most part these values
+	are left at the discretion of the programmer.  However, there
+	are some conventions which the system software follows.
+
+
+		PROCID format:
+
+     			   Bit 15                 Bit 0
+				NEWI IIII IIII IIII
+
+		N = NON-DESTRUCTIBLE process! No routine shall kill
+		    a process with this bit set.
+
+		E = Wave end wait process.  Any wave end routines shall
+		    wait until the system is clear of these processes.
+
+		W = Process not to be killed by wave end routines. 
+
+		I = These bits are free, to be defined by the game.
+
+
+
+
+	Accessing process variables
+	---------------------------
+
+		As mentioned above, each process has a block of RAM
+	which is used to hold information pertinent to the process.
+	This known as the process block.  While any given process is
+	executing, A13 will hold the pointer to its process block.
+	A13 shall remain as the pointer when calling any routines,
+	unless otherwise stated by that routine.
+
+		Through this pointer, the process may access any of
+	its internal variables by using the mnemonic offsets previously
+	described.
+
+		Examples:
+
+		     1.	The process wishes to load its current I.D.
+			into register A0.
+
+				MOVE	*A13(PROCID),A0,W
+
+		     2. The process wishes to access the fourth long	
+			word in its data area to register A4.
+
+				MOVE	*A13(PDATA+60H),A4,L
+
+		Since the process stack pointer is kept in A12 while
+	the process is executing.  The process may push registers
+	on to its local stack by the following:
+
+				MMTM	A12,<register list>
+
+		And remove them by:
+		
+				MMFM	A12,<register list>
+
+	Note: It is of utmost importance that the process keep registers
+	      A13 and A12 intact while calling any routines.  It is	
+	      therefore recommended that the programmer refrain from	
+	      using these registers unless it is absolutely necessary.	
+
+
+
+
+	Summary of Routines contained in xPROC.ASM
+	------------------------------------------
+
+	EXISTP		- Find an active process of a certain class.
+	GETA8		- Get register A8 from a sleeping process.
+	GETA9		- Get register A9 from a sleeping process.
+	GETA10		- Get register A10 from a sleeping process.
+	GETA11		- Get register A11 from a sleeping process.
+	GETPRC		- Create a process and add it to the ACTIVE list.
+	KILL		- Kill any active process but yourself.
+	KILALL		- Kill a class of processes.
+	OBJPROC_KILL	- Kill a process controlling a given object.
+	OBJPROC_XFER	- Transer a process controlling a given object.
+	PINIT		- Initialize the FREE and ACTIVE process lists.
+	PRCLSP		- Sleep and wakeup at given address
+	PRCSLP		- Process sleep function.
+	PUTA8		- Put register A8 into a sleeping process.
+	PUTA9		- Put register A9 into a sleeping process.
+	PUTA10		- Put register A10 into a sleeping process.
+	PUTA11		- Put register A11 into a sleeping process.
+	SUCIDE		- Process die function.
+	XFERPROC	- Transer control of a process to a new routine.
+
+
+	Macro		Routine
+	-----		-------
+
+	CREATE		GETPRC
+	DIE		SUCIDE
+	JSRP		-
+	MATCHP		EXISTP
+	NOMATCHP	EXISTP
+	PULLP		-
+	PUSHP		-
+	RETP		-
+	SLEEP		PRCSLP
+	SLEEPM		PRCSLP
+	SLEEPR		PRCSLP
+	SLOOP		PRCLSP
+	SLOOPR		PRCLSP
+
+
+	All equates and definitions pertinant to the Multi-tasking 
+	system can be found in MPROCEQU.ASM.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	      Williams Electronics Z-Unit Video Software System
+	      -------------------------------------------------
+
+
+		    Multi-Tasking System Routine Reference
+
+
+	     Copyright (c) 1988 Williams Electronics Games, Inc.
+			    All Rights Reserved
+
+
+  EXISTP							     EXISTP
+
+	Description:
+	
+		Scan the Active process list for a process with
+	the given Process I.D. other than the calling process.
+
+-----------------------------------------------------------------------------
+
+Input:
+	A0 = 16 bit Process I.D. to scan
+	A1 = Mask
+Returns:
+	 Z = Not found (A0 = 0)
+	NZ = Found (A0 = ptr to process)
+Found in:
+	xPROC.ASM
+
+-----------------------------------------------------------------------------	
+Notes:
+	- Mask - A bit for bit mask of the Process I.D.
+		0 = Don't care
+		1 = Must match
+
+	- See macros MATCHP and NOMATCHP
+
+
+  GET8                                                                 GETA8
+  GET9								       GETA9
+  GET10								       GETA10
+  GET11								       GETA11
+
+	Description:
+
+		Get a preserved register from a sleeping process
+
+------------------------------------------------------------------------------
+
+Input:
+	A0 --> sleeping process
+
+Returns:
+	A8,A9,A10, or A11 = preserved value
+
+Found in:
+	xPROC.ASM
+
+------------------------------------------------------------------------------
+
+
+  GETPRC                                                              GETPRC
+
+	Description:
+
+		Create a process and add it to the ACTIVE list.
+
+------------------------------------------------------------------------------
+         
+Input:
+	A1 = PROCID
+	A7 = starting PC address
+	A8-A11 passed to new process
+
+Returns:
+	 Z = No more processes available (A0 = 0)
+	NZ = Process created successfully (A0 = ptr to process)
+
+Found in:
+	xPROC.ASM
+
+------------------------------------------------------------------------------
+Notes:
+	- See macro CREATE
+
+
+  KILL                                                                  KILL
+
+	Description:
+
+		Kill a process, remove it from the ACTIVE list.
+
+------------------------------------------------------------------------------
+         
+Input:
+	A0 = pointer to process structure to kill
+
+Returns:
+	nothing
+
+Found in:
+	xPROC.ASM
+
+------------------------------------------------------------------------------
+
+
+  KILALL                                                              KILALL
+
+	Description:
+
+		Kill a class of processes.
+
+------------------------------------------------------------------------------
+         
+Input:         
+	A0 = I.D. to kill
+	A1 = mask bits (zeros are "don't care" bits)
+
+Returns:
+	nothing
+
+Found in:
+        xPROC.ASM
+
+------------------------------------------------------------------------------
+Notes:
+	- Mask - A bit for bit mask of the Process I.D.
+		0 = Don't care
+		1 = Must match
+
+	- See macro KILLIT
+
+
+  OBJPROC_KILL							OBJPROC_KILL
+
+	Description:
+
+		Kill a process controlling an object.
+
+-----------------------------------------------------------------------------
+
+Input:
+	A8 = pointer to object block
+
+Returns:
+	nothing
+
+Found in:
+	xPROC.ASM
+
+-----------------------------------------------------------------------------
+Notes:
+	- If no process is associated, then nothing is done.
+
+	- SUCIDE must be used if the caller is the controlling process.
+
+
+  OBJPROC_XFER					                OBJPROC_XFER
+
+	Description:
+
+		Transfer process controlling an object to a new
+	routine.
+
+-----------------------------------------------------------------------------
+
+Input:
+	A1 = New Process I.D.
+	A7 = Address of new routine
+	A8 = pointer to object block
+
+Returns:
+	nothing
+
+Found in:
+	xPROC.ASM
+
+-----------------------------------------------------------------------------
+		
+
+  PINIT								       PINIT
+
+	Description:
+
+		Initialize the process systems FREE and ACTIVE lists.
+	All processes are destroyed.
+
+-----------------------------------------------------------------------------
+
+Input:
+	nothing
+
+Returns:
+	A13 = pointer to the head of the ACTIVE list
+
+Found in:
+	xPROC.ASM
+
+-----------------------------------------------------------------------------
+
+
+  PRCLSP							      PRCLSP
+
+	Description:
+
+		Make a process sleep and then wake up at a given
+	address.
+
+-----------------------------------------------------------------------------
+
+Input:
+	A0 = sleep time
+	A7 = wakeup address
+	A13 = pointer to the calling processes process block
+
+Returns:
+	nothing
+
+Found in:
+	xPROC.ASM
+
+-----------------------------------------------------------------------------
+Notes:
+	- See macros SLOOP and SLOOPR
+
+
+  PRCSLP							      PRCSLP
+
+	Description:
+
+		Make a process sleep and then continue executing.
+
+-----------------------------------------------------------------------------
+
+Input:
+	A0 = sleep time
+	A13 = pointer to the calling processes process block
+
+Returns:
+	nothing
+
+Found in:
+	xPROC.ASM
+
+-----------------------------------------------------------------------------
+Notes:
+	- See macros SLEEP, SLEEPR and SLEEPM
+
+
+  PUT8                                                                 PUTA8
+  PUT9								       PUTA9
+  PUT10								       PUTA10
+  PUT11								       PUTA11
+
+	Description:
+
+		Change a preserved register in a sleeping process.
+
+------------------------------------------------------------------------------
+
+Input:
+	A0 --> sleeping process
+
+Returns:
+	A8,A9,A10, or A11 = preserved value
+
+Found in:
+	xPROC.ASM
+
+------------------------------------------------------------------------------
+
+  SUCIDE							      SUCIDE
+
+	Description:
+	
+		Cause a process to permanently give up control
+	of the processor.
+
+-----------------------------------------------------------------------------
+
+Inputs:
+	A13 = pointer to the calling processes process block
+
+Returns:
+	never
+
+Found in:
+	xPROC.ASM
+
+-----------------------------------------------------------------------------
+Notes:
+	- Call with JAUC.
+
+	- See macro DIE.
+
+
+  XFERPROC							    XFERPROC
+
+	Description:
+
+		Transfer an existing process to a new routine.
+
+-----------------------------------------------------------------------------
+
+Inputs:
+	A0 = pointer to process to be transferred
+	A1 = New process I.D.
+	A7 = New wakeup address
+	A8 - A11 passed to process
+
+Returns:
+	nothing
+
+Found in:
+	xPROC.ASM
+
+-----------------------------------------------------------------------------
+
+
+

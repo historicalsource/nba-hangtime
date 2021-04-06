@@ -1,0 +1,73 @@
+;done:	EGM screen
+;done:	Results screen shows blanks in 0-0 OT quarters
+;done:	Add kid players
+;done:	winningteam free credit bug fixed - sound reset still OK
+;done:	Add Jon Zirin
+;done:	Put Byron Scott into Lakers lineup
+;done:	Don't forget to finish #team_data (select2)
+;done:	Re-order teams
+;done:	Hot spots
+;done:	College heads
+;done:	New team line-ups
+;done:	What to do about created player hotspots
+;done:	Fix lineups for attract Starring screen
+;done:	Show hotspots powerup
+;done:	Update Grand Champ screen text (more?)
+;MAX:	Show hidden stats
+;MAX:	New dunks
+;done:	Shouldn't say "Next Opponent" when Grand Champ
+;done:	New logos for Detroit,Minnesota,Utah
+;done:	Fix repeatative outdoor court net_ani calls in BB3
+;MAX:	Put hotspots into drone logic
+
+;MAX:	Slap-off rim in 1 tick bug
+;MAX:	Better rejection/goal tending code
+;MAX:	No double dunk attach on potential on-fire shot
+;MAX:	Don't grab final seconds shots for a dunk
+;done:	Speed up spin move
+
+;done:	New audio selections
+;done:	Helicopter dunk sound
+;done:	Says "stolen" when possession changes after a bucket
+;done:	Needs to say "Maximum Hangtime"
+;done:	Game/Shot/Fire clocks need different sounds
+;done:	Ball-grab sound on alley-oop
+
+;done:	AAMA screen
+;done:	Drone difficulty - on-fires @ start of game after X player wins
+;MAX:	Flash Maximum word on title
+;done:	Use created players in attract demo
+;MAX:	Attract mode flash hype
+;done:	Court select easier
+;MAX:	Double dunk world record
+;MAX:	World record achieved message
+;MAX:	Player score bar
+;MAX:	Use basketball anim in attract
+;MAX:	Different create plyr heads/rules
+;MAX:	Some special heads aren't all in - Ehrlich,Funk, etc
+;MAX:	Paper/debris stuff
+;done:	Fix "4 games minimum"
+;done:	Don't allow quick tap out of OT buyin screen
+;done:	KI type pup display
+
+
+Pre 4/5/96
+==========
+;JEFF:	Halftime team swap
+;JEFF:	Snd system volume reset problem
+;JEFF:	Do attract mode/sound volume
+;JEFF:	Fix favored by points on vs. screen
+;JEFF:	Score plate clock digits glitch @ halftime fade
+;JEFF:	What happens when you go grand champ
+;JEFF:	Fix white pix (IRQSKYE?) on stat screen fade down
+;JEFF:	"Player of the game..." at half doesn't always come up
+;JEFF:	Pump up Hot dog sound priority
+;JEFF:	Scroller WORLDTLY when plaques come down
+;JEFF:	Check rules on same-time use of a plyr record -
+;       gives undefeated record, doubles world record score (?)
+;JEFF:	Cannonball sound effect
+;JEFF:	No music on start out of attract mode!!
+;JEFF:	Get rid of long delay on sound board reset (at reset game time)
+;JEFF:	Didn't play full game, but final result page came up...
+;JEFF:	Make sure alleyoop rule & logic are right
+

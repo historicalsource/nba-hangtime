@@ -1,0 +1,29 @@
+Hi Bill,
+
+
+	Some of	the programs enclosed on this disk replace existing 
+	utilities -- namely... wlib.exe, loadimg.exe, sdbl.exe, and
+	blimp.exe.  If you already have these utilities, you should
+	save them somewhere in case you have a problem with the new
+	ones.  The difference in these new versions is simply the 
+	support of a slight change in the structures used by WIMP.
+	The new versions detect and support both old and new WIMP
+	files.
+
+	The file newwimp.exe goes in your BIN directory and is used
+	just like the old WIMP.  I've also included a batch file called
+	nwimp.bat which demonstrates the way in which newwimp can
+	set your background and cursor colors on invocation.
+
+	The format is...   newwimp /COL=bgcolr,cursrcolr
+
+		where bgcolr and cursrcolr are 16-bit hex 
+		numbers in which bits 0-4 = blue component
+				 bits 5-9 = green component
+				 bits 10-14 = red component
+			       & bit  15  = 0.
+
+				Have fun!
+
+				Warren
+

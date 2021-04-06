@@ -1,0 +1,121 @@
+L1.1  ->  M1.1
+--------------
+AUDIT.ASM    1) Version string
+
+DIAG.ASM     1) PIC # location comments
+             2) ROM checksums
+
+PLYR2.ASM    1) Jamie ball-code bug
+
+RECORD.ASM   1) Pts/game world record fix
+             2) <dec_to_asc2> call added to correct hi-score leading-zero
+               after the decimal problem
+
+SELECT4.ASM  1) Commented unref'd .refs
+
+STRING.ASM   1) <dec_to_asc2> routine added
+
+GAME.EQU     1) CMOS PKDxx .equs updated
+             2) NUM_PRECORDS comments for 8K/32K CMOS support
+             3) NUM_PRECORDS reduced from 410 to 195 for 8K CMOS support
+
+L1.1  ->  L1.2
+--------------
+AUDIT.ASM    1) Version string
+             2) <opmsg_clr> .ref moved down to ref
+
+BB.ASM       1) Watchdog & Process KO auditing fix
+
+DIAG.ASM     1) PIC # location comments
+             2) ROM checksums
+             3) Watchdog failure during SRAMCHECK fix
+
+MENU.ASM     1) <opmsg_main> .ref moved down to ref
+             2) <opmsg_s> removed from <UTIL_HELP>
+             3) Backdoor volume control Interlock switch problem fix
+             4) Old high score stuff removed
+             5) Old <MISC_AUD> stuff removed
+             6) Old design team text removed
+
+PLYR2.ASM    1) Jamie ball-code bug
+
+RECORD.ASM   1) Pts/game world record fix
+             2) <dec_to_asc2> call added to correct hi-score leading-zero
+                after the decimal problem
+             3) "Hi-score" comment-list corrected
+             4) <#teampals> table/refs removed
+             5) Backdoor player record list length fix
+
+SELECT2.ASM  1) Grand Champion leading-space initials crash fix
+
+SELECT4.ASM  1) Commented unref'd .refs
+
+STRING.ASM   1) <dec_to_asc2> routine added
+
+TEST.ASM     1) "DIPSWITCH TEST SELECT" message fix
+
+GAME.EQU     1) CMOS PKDxx .equs updated
+             2) NUM_PRECORDS comments for 8K/32K CMOS support
+             3) NUM_PRECORDS .equs moved to top of file
+
+L1.1  ->  M1.2
+--------------
+AUDIT.ASM    1) Version string
+             2) <opmsg_clr> .ref moved down to ref
+
+BB.ASM       1) Watchdog & Process KO auditing fix
+
+DIAG.ASM     1) PIC # location comments
+             2) ROM checksums
+             3) Watchdog failure during SRAMCHECK fix
+
+MENU.ASM     1) <opmsg_main> .ref moved down to ref
+             2) <opmsg_s> removed from <UTIL_HELP>
+             3) Backdoor volume control Interlock switch problem fix
+             4) Old high score stuff removed
+             5) Old <MISC_AUD> stuff removed
+             6) Old design team text removed
+
+PLYR2.ASM    1) Jamie ball-code bug
+
+RECORD.ASM   1) Pts/game world record fix
+             2) <dec_to_asc2> call added to correct hi-score leading-zero
+                after the decimal problem
+             3) "Hi-score" comment-list corrected
+             4) <#teampals> table/refs removed
+             5) Backdoor player record list length fix
+
+SELECT2.ASM  1) Grand Champion leading-space initials crash fix
+
+SELECT4.ASM  1) Commented unref'd .refs
+
+STRING.ASM   1) <dec_to_asc2> routine added
+
+TEST.ASM     1) "DIPSWITCH TEST SELECT" message fix
+
+GAME.EQU     1) CMOS PKDxx .equs updated
+             2) NUM_PRECORDS comments for 8K/32K CMOS support
+             3) NUM_PRECORDS .equs moved to top of file
+             4) NUM_PRECORDS reduced from 410 to 195 for 8K CMOS support
+
+L1.2  ->  L1.3
+--------------
+ATTRACT.ASM  1) Disasterous SLEEPK 8 removed from top of <amode_start>
+                to fix power-up <winningteam> free game bug
+             2)	<set_game_snd> call added to top of <amode_start>
+                to fix power-up volume problem from SLEEPK removal
+
+AUDIT.ASM    1) Version string
+
+DIAG.ASM     1) ROM checksums
+
+M1.2  ->  M1.3
+--------------
+ATTRACT.ASM  1) Disasterous SLEEPK 8 removed from top of <amode_start>
+                to fix power-up <winningteam> free game bug
+             2)	<set_game_snd> call added to top of <amode_start>
+                to fix power-up volume problem from SLEEPK removal
+
+AUDIT.ASM    1) Version string
+
+DIAG.ASM     1) ROM checksums

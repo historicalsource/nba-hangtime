@@ -1,0 +1,657 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+			THE BRAND SPANKING NEW DMA (#2)
+
+			KEEP ENTERPRISES, INC.
+
+			JANUARY 1, 1992
+
+			DOCUMENT REV. 1.5
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	DMA # 2 - GENERAL INFORMATION
+
+	- THE NEW DMA WILL INCORPORATE BACKWARD COMPATIBILITY TO THE OLD DMA
+	IN BOTH PINOUT AND FUNCTIONALITY.
+
+	- THE NEW FEATURES IN ADDITION TO THE OLD ARE AS FOLLOWS:
+
+		1) VARIABLE PIXEL SIZE PROCESSING.  THE NEW DMA CAN PROCESS
+		   1 TO 8 BIT PIXELS THAT ARE STORED IN IMAGE MEMORY IN A
+		   SERIAL FASHION.
+
+		   EXAMPLE:  5 BIT PIXELS STORED INTO 8 BIT EPROM
+		   +---+---+---+---+---+---+---+---+
+		   |P1 |P1 |P1 |P1 |P1 |P2 |P2 |P2 |
+		   +---+---+---+---+---+---+---+---+
+		   |P2 |P2 |P3 |P3 |P3 |P3 |P3 |P4 |
+		   +---+---+---+---+---+---+---+---+
+		   |P4 |P4 |P4 |P4 |P5 |P5 |P5 |P5 |
+		   +---+---+---+---+---+---+---+---+
+		   |P5 |P6 |P6 |P6 |P6 |P6 |P7 |P7 |
+		   +---+---+---+---+---+---+---+---+
+
+		2) THE NEW DMA CAN BE HALTED IN THE MIDDLE OF A TRANSFER
+		   AND THEN BE RESTARTED TO RESUME THE TRANSFER.  THIS IS
+		   ACCOMPLISHED BY WRITING A ZERO TO THE DMA GO BIT (BIT 15)
+		   IN THE CONTROL REGISTER.  IN THE OLD DMA, THIS WOULD KILL
+		   THE TRANSFER SO THAT IT COULD NOT BE RESTARTED.  TO KILL
+		   A TRANSFER IN THE NEW DMA, WRITE A ZERO TO THE DMA GO BIT 2
+		   TIMES IN A ROW.  TO RESTART A TRANSFER AFTER HALTING,
+		   WRITE A ONE TO THE DMA GO BIT IN THE CONTROL REGISTER.
+
+		3) IN ADDITION TO THE CLIPPING ACHIEVED BY MANIPULATING THE
+		   OFFSET REGISTER, IN THE NEW DMA, A METHOD OF CLIPPING
+		   USING REGISTERED CLIP VALUES IS AVAILABLE. THE HOST CAN
+		   SPECIFY CLIP AMOUNTS TO THE DMA AND THE MATH NEEDED TO
+		   IMPLEMENT A TRANSFER IS DONE INTERNAL TO THE DMA.
+
+		4) THE NEW DMA CAN DO A TRANSFER FROM THE IMAGE MEMORY TO THE
+		   BIT MAP WITH A SCALING EFFECT, I.E. THE IMAGE CAN BE
+		   SHRUNK OR ENLARGED.
+
+		5) THE NEW DMA IMPLEMENTS A COMPRESSION MODE IN WHICH LEADING
+		   AND TRAILING ZERO DATA PIXELS CAN BE ENCODED IN A RUN LENGTH
+		   FASHION TO SAVE ON IMAGE MEMORY.
+
+		6) OFF SCREEN CLIPPING CAN BE AUTOMATIC.  THERE ARE FOUR 
+		   REGISTERS THAT SPECIFY THE WINDOW TO WHICH THE DMA CAN
+		   TRANSFER DATA.  ACCESS TO THESE REGISTERS IS TRICKY AND
+		   IS EXPLAINED BELOW.
+
+		7) NOTE THAT THE CONTROL REGISTER AND THE OFFSET REGISTER
+		   HAVE BEEN SWAPPED SO THAT THE MOVE MULTIPLE INSTRUCTION
+		   CAN BE USED TO DOWNLOAD THE REGISTERS AND SET DMA GO
+		   EFFICIENTLY.
+
+	DMA # 2 - INTERNAL REGISTERS R5-R0
+
+	    REGISTER # 7 - SOURCE VERTICAL SIZE REGISTER
+	    +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+	    | 0 | 0 | 0 | 0 | 0 | 0 |		   VERTICAL SIZE	    |
+	    +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+
+	    REGISTER # 6 - SOURCE HORIZONTAL SIZE REGISTER
+	    +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+	    | 0 | 0 | 0 | 0 | 0 | 0 |		  HORIZONTAL SIZE	    |
+	    +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+
+	    REGISTER # 5 - DESTINATION ADDRESS - Y
+	    +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+	    | 0 | 0 | 0 | 0 | 0 | 0 | 0 |      DESTINATION Y COORDINATE     |
+	    +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+
+	    REGISTER # 4 - DESTINATION ADDRESS - X
+	    +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+	    | 0 | 0 | 0 | 0 | 0 | 0 | 0 |      DESTINATION X COORDINATE     |
+	    +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+
+	    REGISTER # 3 - SOURCE ADDRESS - HIGH ORDER
+	    +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+	    |		      SOURCE ADDRESS UPPER 16 BITS		    |
+	    +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+
+	    REGISTER # 2 - SOURCE ADDRESS - LOW ORDER
+	    +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+	    |		      SOURCE ADDRESS LOWER 16 BITS		    |
+	    +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+
+	    REGISTER # 1 - CONTROL REGISTER   ** SEE NOTE 1 BELOW
+	    +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+	    |DGO|  PIX SIZE |TM1|TM0|LM1|LM0|CMP|CLP|VFL|HFL|	PIXEL OPS   |
+	    +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+
+	    REGISTER # 0 - OFFSET REGISTER / RCLIP-LCLIP VALUES
+	    +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+	    |		   OFFSET VALUE FOR OLD STYLE CLIPPING		    |
+	    |	 LEFT CLIP PIXELS VALUE     |	  RIGHT CLIP PIXELS VALUE   |
+	    +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+
+	    ** NOTE 1:
+	    DGO      - BIT 15	    - DMA GO / DMA HALT
+	    PIX      - BITS 14-12   - PIXEL SIZE (0 = 8 BITS)
+	    TM1      - BIT 11	    - DMA COMPRESS TRAIL PIX MULTIPLIER BIT 1
+	    TM2      - BIT 10	    - DMA COMPRESS TRAIL PIX MULTIPLIER BIT 0
+	    LM1      - BIT 9	    - DMA COMPRESS LEAD  PIX MULTIPLIER BIT 1
+	    LM0      - BIT 8	    - DMA COMPRESS LEAD  PIX MULTIPLIER BIT 0
+	    CMP      - BIT 7	    - DMA COMPRESS MODE
+	    CLP      - BIT 6	    - DMA CLIP ON = 1 (USING U,D,L,R METHOD)
+	    VFL      - BIT 5	    - VERTICAL FLIP (FLIP ABOUT X AXIS)
+	    HFL      - BIT 4	    - HORIZONTAL FLIP (FLIP ABOUT Y AXIS)
+	    OPS      - BITS 3-0     - PIXEL CONSTANT/SUBSTITUTION OPS
+
+	    ** NOTE 2: IN COMPRESSION MODE, SCALING IS INHIBITED AND
+		       CLIPPING IS INHIBITED.
+
+
+
+	DMA # 2 - INTERNAL REGISTERS R15-R6
+
+	    REGISTER # 15 - CONFIG REGISTER   ** SEE NOTE 3 BELOW
+	    +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+	    |     "ZERO" DETECT BYTE        |XPG|DSZ|WIN|CF4|CF3|CF2|CF1|CF0|
+	    +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+
+	    REGISTER # 14 - RESERVED - TEST REGISTER
+	    +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+	    | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+	    +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+
+	    REGISTER # 13 - R/B WINDOW BORDER REGISTER 
+	    +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+	    |	|   |   |   |   |   |     RIGHT / BOTTOM WINDOW BORDER      |
+	    +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+
+	    REGISTER # 12 - L/T WINDOW BORDER REGISTER 
+	    +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+	    |	|   |   |   |   |   |      LEFT / TOP WINDOW BORDER   	    |
+	    +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+
+	    REGISTER # 11 - SCALE REGISTER - Y
+	    +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+	    | 0 | 0 | 0 |  Y SCALE INTEGER  |	    Y SCALE FRACTION	    |
+	    +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+
+	    REGISTER # 10 - SCALE REGISTER - X
+	    +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+	    | 0 | 0 | 0 |  X SCALE INTEGER  |	    X SCALE FRACTION	    |
+	    +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+
+	    REGISTER # 9 - CONSTANT REGISTER
+	    +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+	    |	    ODD PIXEL CONSTANT	    |	    EVEN PIXEL CONSTANT     |
+	    +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+
+	    REGISTER # 8 - PALETTE REGISTER
+	    +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+	    |	    ODD PALETTE VALUE	    |	    EVEN PALETTE VALUE	    |
+	    +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+
+
+	    ** NOTE 3:
+	    XPG      - BIT 7	    - EXTRA PAGE BIT
+	    DSZ      - BIT 6	    - DESTINATION SIZE
+	    WIN      - BIT 5	    - TOP/BOT - RIGHT/LEFT WINDOWING BIT
+	    CF4      - BIT 4        - CONFIG TIMING 4
+	    CF3      - BIT 3	    - CONFIG TIMING 3
+	    CF2      - BIT 2	    - CONFIG TIMING 2
+	    CF1      - BIT 1	    - CONFIG TIMING 1
+	    CF0      - BIT 0	    - CONFIG TIMING 0
+
+
+
+	DMA # 2 - CLIPPING AN IMAGE
+
+	OVERVIEW:
+		- AN IMAGE THAT IS STORED IN IMAGE MEMORY CAN BE
+		TRANSFERRED TO THE BIT MAP BY THE DMA IN ITS ENTIRETY
+		OR WE CAN DMA A PORTION OF THIS IMAGE OUT TO THE BIT
+		MAP.  IT IS POSSIBLE TO "CLIP" AN IMAGE BY TRANSFERRING
+		ONLY THE PORTION OF THE IMAGE DESIRED.
+
+	IMPLEMENTATION:
+		- THERE ARE TWO WAYS TO IMPLEMENT THIS:
+			1) THE OFFSET METHOD (OLD STYLE).
+			2) THE REGISTER CLIP METHOD (NEW FEATURE).
+		- THE OFFSET REGISTER CAN BE CLIPPING PURPOSES:
+			REGISTER #0 - CLIP REGISTER - X
+		- THIS REGISTER CONTAINS THE AMOUNTS TO WHICH THE IMAGE
+		WILL BE CLIPPED IN THE HORIZONTAL OR X DIRECTION.
+		- IN REGISTER #0 THE UPPER BYTE IS THE CLIP AMOUNT OFF THE
+		LEFT AND THE LOWER BYTE IS THE CLIP AMOUNT OFF OF THE RIGHT
+		- TO TURN THE REGISTER CLIPPING CAPABILITY ON, SET THE
+		CONTROL REGISTER BIT CLP (BIT 6) TO A ONE.
+
+		EXAMPLES:
+
+		UNCLIPPED IMAGE:
+		+---+---+---+---+---+---+---+---+
+		| 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 |
+		+---+---+---+---+---+---+---+---+
+		|11 |12 |13 |14 |15 |16 |17 |18 |
+		+---+---+---+---+---+---+---+---+
+		|21 |22 |23 |24 |25 |26 |27 |28 |
+		+---+---+---+---+---+---+---+---+
+
+		EXAMPLE 1:
+		REGISTER 0 = 0201	 X
+		CLIPPED IMAGE:
+		+---+---+---+---+---+
+		| 3 | 4 | 5 | 6 | 7 |
+		+---+---+---+---+---+
+		|13 |14 |15 |16 |17 |
+		+---+---+---+---+---+
+		|23 |24 |25 |26 |27 |
+		+---+---+---+---+---+
+
+		EXAMPLE 2:
+		REGISTER 12 = 0004	 X
+		CLIPPED IMAGE:
+		+---+---+---+---+
+		| 1 | 2 | 3 | 4 |
+		+---+---+---+---+
+		|11 |12 |13 |14 |
+		+---+---+---+---+
+		|21 |22 |23 |24 |
+		+---+---+---+---+
+
+
+
+
+	DMA # 2 - TRANSFERRING A SCALED IMAGE
+
+	OVERVIEW:
+		- A SINGLE IMAGE THAT IS STORED IN IMAGE MEMORY CAN BE
+		TRANSFERRED TO THE BIT MAP BY THE DMA AT ITS NOMINAL
+		SIZE (1:1) OR AT A "SCALED" SIZE.  THIS SCALING CAN
+		TRANSFER AN IMAGE TO THE BIT MAP AT A LARGER OR SMALLER
+		RATIO IN THE X OR Y DIRECTION OR BOTH.
+		- TO SCALE AN IMAGE, I.E. ENLARGE OR SHRINK, THE IMAGE TO
+		BE TRANSFERRED TO THE BIT MAP IS "SAMPLED" BY TRAVERSING
+		EACH LINE WITH THE INTENTION OF SELECTING PIXELS FROM THAT
+		LINE AT A PREDETERMINED RATE.	THIS RATE CAN BE ONE PIXEL
+		PER SAMPLE FOR A 1:1 TRANSFER.	THE VARIANCE OF THIS RATE
+		WILL CAUSE THE IMAGE TO BE SCALED TO OTHER THAN 1:1.
+		- IF THE RATE IS, FOR EXAMPLE, ONE SAMPLE PER EVERY TWO
+		PIXELS, THE IMAGE WILL BE TRANSFERRED TO THE BIT MAP SKIPPING
+		EVERY OTHER PIXEL THUS SHRINKING IT AT A RATIO OF 1:2.
+		- IF THE RATE IS ONE SAMPLE PER EVERY ONE HALF PIXELS, THE
+		IMAGE WILL BE TRANSFERRED TO THE BIT MAP DUPLICATING EVERY
+		PIXEL THUS ENLARGING IT AT A RATIO OF 1:1/2 OR 2:1.
+
+	IMPLEMENTATION:
+		- TWO 16 BIT REGISTERS EXIST FOR SCALING PURPOSES:
+			REGISTER # 11 - SCALE REGISTER - Y
+			REGISTER # 10 - SCALE REGISTER - X
+		- THESE REGISTERS CONTAIN THE RATIOS TO WHICH THE IMAGE
+	        WILL BE SCALED (1:FACTOR).
+		- IN REGISTER #11 THE UPPER BYTE IS THE FACTOR INTEGER AND
+		THE LOWER BYTE IS THE FACTOR FRACTION IN THE Y DIRECTION.
+		- IN REGISTER #10 THE UPPER BYTE IS THE FACTOR INTEGER AND
+		THE LOWER BYTE IS THE FACTOR FRACTION IN THE X DIRECTION.
+		- THE RATIO IS 1:(INT + FRAC/256).
+		- TO TURN THE SCALING CAPABILITY ON, LOAD AT LEAST ONE SCALE
+		REGISTER WITH SOMETHING OTHER THAN 0100 (1:1) SCALING.
+
+		EXAMPLES:
+
+		UNSCALED IMAGE:
+		+---+---+---+---+---+---+---+---+
+		| 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 |
+		+---+---+---+---+---+---+---+---+
+		|11 |12 |13 |14 |15 |16 |17 |18 |
+		+---+---+---+---+---+---+---+---+
+
+		EXAMPLE 1:
+		REGISTER 11 = 0100	 VERT
+		REGISTER 10 = 0080	 HORZ
+		SCALED IMAGE:
+	      +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+	      | 1 | 1 | 2 | 2 | 3 | 3 | 4 | 4 | 5 | 5 | 6 | 6 | 7 | 7 | 8 | 8 |
+	      +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+	      |11 |11 |12 |12 |13 |13 |14 |14 |15 |15 |16 |16 |17 |17 |18 |18 |
+	      +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+
+		SEE NEXT PAGE FOR MORE EXAMPLES.
+
+
+	DMA # 2 - TRANSFERRING A SCALED IMAGE (CONTINUED)
+
+	IMPLEMENTATION (CONTINUED):
+
+		EXAMPLE 2:
+		REGISTER 11 = 0080	 VERT
+		REGISTER 10 = 0100	 HORZ
+		SCALED IMAGE:
+		+---+---+---+---+---+---+---+---+
+		| 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 |
+		+---+---+---+---+---+---+---+---+
+		| 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 |
+		+---+---+---+---+---+---+---+---+
+		|11 |12 |13 |14 |15 |16 |17 |18 |
+		+---+---+---+---+---+---+---+---+
+		|11 |12 |13 |14 |15 |16 |17 |18 |
+		+---+---+---+---+---+---+---+---+
+
+		EXAMPLE 3:
+		REGISTER 11 = 0080	 VERT
+		REGISTER 10 = 0080	 HORZ
+		SCALED IMAGE:
+	      +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+	      | 1 | 1 | 2 | 2 | 3 | 3 | 4 | 4 | 5 | 5 | 6 | 6 | 7 | 7 | 8 | 8 |
+	      +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+	      | 1 | 1 | 2 | 2 | 3 | 3 | 4 | 4 | 5 | 5 | 6 | 6 | 7 | 7 | 8 | 8 |
+	      +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+	      |11 |11 |12 |12 |13 |13 |14 |14 |15 |15 |16 |16 |17 |17 |18 |18 |
+	      +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+	      |11 |11 |12 |12 |13 |13 |14 |14 |15 |15 |16 |16 |17 |17 |18 |18 |
+	      +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+
+		EXAMPLE 4:
+		REGISTER 11 = 0080	 VERT
+		REGISTER 10 = 0200	 HORZ
+		SCALED IMAGE:
+		+---+---+---+---+
+		| 1 | 3 | 5 | 7 |
+		+---+---+---+---+
+		| 1 | 3 | 5 | 7 |
+		+---+---+---+---+
+		|11 |13 |15 |17 |
+		+---+---+---+---+
+		|11 |13 |15 |17 |
+		+---+---+---+---+
+
+		EXAMPLE 5:
+		REGISTER 11 = 00C0	 VERT
+		REGISTER 10 = 00C0	 HORZ
+		SCALED IMAGE:
+		+---+---+---+---+---+---+---+---+---+---+---+---+
+		| 1 | 1 | 2 | 3 | 3 | 4 | 5 | 5 | 6 | 7 | 7 | 8 |
+		+---+---+---+---+---+---+---+---+---+---+---+---+
+		| 1 | 1 | 2 | 3 | 3 | 4 | 5 | 5 | 6 | 7 | 7 | 8 |
+		+---+---+---+---+---+---+---+---+---+---+---+---+
+		|11 |11 |12 |13 |13 |14 |15 |15 |16 |17 |17 |18 |
+		+---+---+---+---+---+---+---+---+---+---+---+---+
+
+
+
+	DMA # 2 - COMPRESSION OF LEADING AND TRAILING ZEROS
+
+	OVERVIEW:
+		- TO SAVE IMAGE SPACE, IT MAY BE USEFUL TO DO SOME DATA
+		COMPRESSION ON IMAGES.	THAT IS WHAT WE WILL TRY TO DO.
+		- IN THEORY, SINCE ALL IMAGES ARE STORED AS RECTANGLES,
+		THERE SHOULD BE A SAVINGS IN COMPRESSING THE TRANSPARENT
+		PIXELS (I.E. THE ZERO PIXEL DATA).
+		- ON A LINE BY LINE BASIS, IF WE HAD INFORMATION PERTAINING
+		TO THE NUMBER OF LEADING AND TRAILING ZERO DATA PIXELS, WE
+		COULD DO A SIMPLE RUN LENGTH ENCODING OF THESE USELESS PIXELS.
+		- FURTHERMORE, IF WE ADDED THIS INFORMATION TO THE ACTUAL
+		IMAGE DATA, WE COULD DO AN "ON THE FLY" DECODE OF THIS
+		INFORMATION AND ACHIEVE A DECOMPRESSION OF AN ENCODED
+		(COMPRESSED) IMAGE, THUS SAVING IMAGE MEMORY AND MONEY.
+
+	IMPLEMENTATION:
+		ON SELECTED IMAGES, THE FIRST BYTE WILL BE ALLOCATED
+		PER LINE OF THE IMAGE TO INDICATE NUMBER OF LEADING AND
+		TRAILING ZERO PIXELS THAT HAVE BEEN COMPRESSED.
+		SEE EXAMPLE BELOW:
+
+		UNCOMPRESSED IMAGE:
+		+---+---+---+---+---+---+---+---+---+---+---+---+
+		| 0 |18 |18 | 0 | 4 |44 |45 |66 |67 |65 | 0 | 0 |
+		+---+---+---+---+---+---+---+---+---+---+---+---+
+		| 0 | 0 | 0 | 0 | 9 |13 |13 |11 | 8 | 0 | 0 | 0 |
+		+---+---+---+---+---+---+---+---+---+---+---+---+
+		|19 |18 |18 | 0 | 0 | 0 |45 |66 |67 |65 |68 |69 |
+		+---+---+---+---+---+---+---+---+---+---+---+---+
+
+		COMPRESSED IMAGE:
+		+---+---+---+---+---+---+---+---+---+---+
+		|21 |18 |18 | 0 | 4 |44 |45 |66 |67 |65 |
+		+---+---+---+---+---+---+---+---+---+---+
+		|34 | 9 |13 |13 |11 | 8 |
+		+---+---+---+---+---+---+---+---+---+---+---+---+---+
+		|00 |19 |18 |18 | 0 | 0 | 0 |45 |66 |67 |65 |68 |69 |
+		+---+---+---+---+---+---+---+---+---+---+---+---+---+
+
+		IN THE TOP LINE OF THE COMPRESSED IMAGE,
+			THE FIRST BYTE IS A 12:
+			1 LEADING ZERO PIXEL, 2 TRAILING ZERO PIXELS
+
+		IN THE CENTER LINE OF THE COMPESSED IMAGE,
+			THE FIRST BYTE IS A 43:
+			4 LEADING ZERO PIXELS, 3 TRAILING ZERO PIXELS
+
+		IN THE BOTTOM LINE OF THE COMPESSED IMAGE,
+			THE FIRST BYTE IS A 00:
+			0 LEADING ZERO PIXELS, 0 TRAILING ZERO PIXELS
+
+		THE DMA WILL DECODE THIS PROPERLY IF THE PROPER BITS ARE
+		SET IN THE CONTROL REGISTER:
+			TM2 - BIT 11 = 0
+			TM2 - BIT 10 = 0
+			LM1 - BIT 9  = 0
+			LM0 - BIT 8  = 0
+			CMP - BIT 7  = 1
+
+
+	DMA # 2 - COMPRESSION OF LEADING AND TRAILING ZEROS (CONTINUED)
+
+	OBSERVATIONS:
+		1) THE TOP NIBBLE (4 BITS) OF THE FIRST BYTE IN EACH
+		   COMPRESSED LINE REPRESENTS THE NUMBER OF TRAILING
+		   ZERO PIXELS.
+
+		2) THE BOTTOM NIBBLE (4 BITS) OF THE FIRST BYTE IN EACH
+		   COMPRESSED LINE REPRESENTS THE NUMBER OF LEADING
+		   ZERO PIXELS.
+
+		3) THE OVERALL SAVINGS OF BYTES IN THE ABOVE EXAMPLE
+		   IS 7 BYTES.
+
+		4) NOTE THAT IN THE BOTTOM LINE WE ACTUALLY USED ONE
+		   MORE BYTE THAN BEFORE.  BE CAREFUL OF WHAT IMAGES
+		   YOU TRY TO COMPRESS.
+
+		5) THE ABOVE EXAMPLE USES 8 BIT PIXELS.  THE NEW DMA
+		   WILL BE ABLE TO MANIPULATE IMAGES OF N BITS PER PIXEL
+		   (N = 1 TO 8).  IN THE COMPRESSION MODE, THE ABOVE
+		   SCENARIO DOES NOT CHANGE.  EACH LINE WILL START WITH
+		   AN 8 BIT VALUE FOR THE COMPRESSION INFORMATION AND
+		   THERE FOLLOWS THE PIXELS IN SERIAL FASHION.	THE
+		   SAVINGS IN COMPRESSION ARE THEN REALIZED IN PIXELS
+		   AND NOT BYTES.
+
+		   BIT SAVINGS = (PIXELS COMPRESSED * BITS PER PIXEL) -
+				 (NUMBER OF LINES * 8 BITS).
+
+		6) THE TMx,LMx BITS IN THE CONTROL REGISTER (BITS 8-11,
+		   THE COMPRESS MULTIPLIER BITS) CONTROL THE FACTORS WHICH
+		   IS MULTIPLIED BY THE NIBBLE DATA TO OBTAIN THE NUMBER
+		   OF LEADING/TRAILING ZERO PIXELS.
+
+		   TM1	TM0  LM1  LM0	    MULTIPLIER
+		   ---	---  ---  ---	  -----------------------
+		    X	 X    0    0	   X 1 TO LEADING PIXELS
+		    X	 X    0    1	   X 2 TO LEADING PIXELS
+		    X	 X    1    0	   X 4 TO LEADING PIXELS
+		    X	 X    1    1	   X 8 TO LEADING PIXELS
+		    0	 0    X    X	   X 1 TO TRAILING PIXELS
+		    0	 1    X    X	   X 2 TO TRAILING PIXELS
+		    1	 0    X    X	   X 4 TO TRAILING PIXELS
+		    1	 1    X    X	   X 8 TO TRAILING PIXELS
+
+		   SEE EXAMPLES ON NEXT PAGE.
+
+
+
+	DMA # 2 - COMPRESSION OF LEADING AND TRAILING ZEROS (CONTINUED)
+
+	OBSERVATIONS (CONTINUED):
+
+		   EXAMPLE 1:
+			    IF IN THE CONTROL REGISTER:
+			    TM1 - BIT 11 = 0
+			    TM0 - BIT 10 = 0
+			    LM1 - BIT 9  = 0
+			    LM0 - BIT 8  = 0
+			    AND THE FIRST BYTE IN A COMPRESSED LINE IS 62
+			    THEN THERE ARE 2 LEADING ZERO PIXELS AND
+				 THERE ARE 6 TRAILING ZERO PIXELS.
+		   EXAMPLE 2:
+			    IF IN THE CONTROL REGISTER:
+			    TM1 - BIT 11 = 0
+			    TM0 - BIT 10 = 1
+			    LM1 - BIT 9  = 0
+			    LM0 - BIT 8  = 1
+			    AND THE FIRST BYTE IN A COMPRESSED LINE IS 62
+			    THEN THERE ARE 4 LEADING ZERO PIXELS AND
+				 THERE ARE 12 TRAILING ZERO PIXELS.
+		   EXAMPLE 3:
+			    IF IN THE CONTROL REGISTER:
+			    TM1 - BIT 11 = 1
+			    TM0 - BIT 10 = 1
+			    LM1 - BIT 9  = 1
+			    LM0 - BIT 8  = 0
+			    AND THE FIRST BYTE IN A COMPRESSED LINE IS 62
+			    THEN THERE ARE 8 LEADING ZERO PIXELS AND
+				 THERE ARE 48 TRAILING ZERO PIXELS.
+		   EXAMPLE 4:
+			    IF IN THE CONTROL REGISTER:
+			    TM1 - BIT 11 = 0
+			    TM0 - BIT 10 = 1
+			    LM1 - BIT 9  = 0
+			    LM0 - BIT 8  = 1
+
+		   UNCOMPRESSED IMAGE:
+		   +---+---+---+---+---+---+---+---+---+---+---+---+
+		   | 0 |18 |18 | 0 | 4 |44 |45 |66 |67 |65 | 0 | 0 |
+		   +---+---+---+---+---+---+---+---+---+---+---+---+
+		   | 0 | 0 | 0 | 0 | 9 |13 |13 |11 | 8 | 0 | 0 | 0 |
+		   +---+---+---+---+---+---+---+---+---+---+---+---+
+		   |19 |18 |18 | 0 | 0 | 0 |45 |66 |67 |65 |68 |69 |
+		   +---+---+---+---+---+---+---+---+---+---+---+---+
+
+		   COMPRESSED IMAGE:
+		   +---+---+---+---+---+---+---+---+---+---+---+
+		   |01 | 0 |18 |18 | 0 | 4 |44 |45 |66 |67 |65 |
+		   +---+---+---+---+---+---+---+---+---+---+---+
+		   |21 | 9 |13 |13 |11 | 8 | 0 |
+		   +---+---+---+---+---+---+---+---+---+---+---+---+---+
+		   |00 |19 |18 |18 | 0 | 0 | 0 |45 |66 |67 |65 |68 |69 |
+		   +---+---+---+---+---+---+---+---+---+---+---+---+---+
+
+		   SAVINGS ARE ONLY 5 PIXELS.
+
+
+	DMA # 2 - OFF SCREEN CLIPPING (WINDOWING)
+
+	OVERVIEW:
+		- THE OVERHEAD OF CLIPPING IMAGES FOR THE SAKE OF OFF SCREEN
+		MANAGEMENT CAN BE REDUCED BY THE WINDOWING FEATURE OF THE
+		NEW DMA.
+
+	IMPLEMENTATION:
+		- THERE ARE 4 REGISTERS IN THE NEW DMA WHICH SPECIFY
+		THE WINDOW BOUNDARIES TO WHICH AN IMAGE CAN BE TRANSFERRED.
+		THESE ARE:
+
+	      WINDOW REGISTER # 13 - DESTINATION ADDRESS UPPER LIMIT (WIN = 1)
+	      +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+	      | 0 | 0 | 0 | 0 | 0 | 0 | 0 |	       UPPER LIMIT	      |
+	      +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+
+	      WINDOW REGISTER # 12 - DESTINATION ADDRESS UPPER LIMIT (WIN = 1)
+	      +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+	      | 0 | 0 | 0 | 0 | 0 | 0 | 0 |	       LOWER LIMIT	      |
+	      +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+
+	      WINDOW REGISTER # 13 - DESTINATION ADDRESS LEFT LIMIT  (WIN = 0)
+	      +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+	      | 0 | 0 | 0 | 0 | 0 | 0 | 0 |	       LEFT  LIMIT	      |
+	      +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+
+	      WINDOW REGISTER # 12 - DESTINATION ADDRESS RIGHT LIMIT (WIN = 0)
+	      +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+	      | 0 | 0 | 0 | 0 | 0 | 0 | 0 |	       RIGHT LIMIT	      |
+	      +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+
+		- THE VALUES THAT CAN BE PUT INTO THESE REGISTERS ARE
+		  0 TO 511.
+
+		- ACCESS TO THESE REGISTERS IS AS FOLLOWS:
+		  1) SET BIT 5 OF THE CONFIG REGISTER TO A 0 FOR LEFT/RIGHT.
+		  2) SET BIT 5 OF THE CONFIG REGISTER TO A 1 FOR UPPER/LOWER.
+
+
+
+
+
+	DMA # 2 - LIMITATIONS
+
+	OVERVIEW:
+		- THERE ARE A FEW LIMITAIONS TO THE FEATURES DESCRIBED
+		  ABOVE. THESE LIMITAIONS ARE OUTLINED BELOW.
+
+	SCALING LIMITATIONS:
+		- IN GROWING AND SHRINKING OF IMAGES, THERE IS A LIMIT TO
+		  WHICH AN IMAGE CAN BE SCALED IN THE X DIRECTION (I.E.
+		  HORIZONTALLY). THE LIMIT OF SHRINKING AN IMAGE DEPENDS
+		  ON THE NUMBER OF BITS PER PIXEL IN THE IMAGE. THE TABLE
+		  BELOW SHOWS THE MAXIMUM SCALE FACTOR THAT CAN BE USED
+		  FOR WHAT TYPE OF IMAGES.
+
+
+		MAXIMUM SCALE FACTOR FOR SHRINK IN X DIRECTION
+		----------------------------------------------
+
+		#BITS/PIXEL		INT  FRACTION
+		-----------		---- --------
+		     1			 1F	FF
+		     2			 10	00
+		     3			 0A	AA
+		     4			 08	00
+		     5			 06	66
+		     6			 05	55
+		     7			 04	92
+		     8			 04	00
+
+
+
+		MINIMUM SCALE FACTOR FOR GROW IN X DIRECTION
+		--------------------------------------------
+
+		#BITS/PIXEL		INT  FRACTION
+		-----------		---- --------
+		     1			 00	01
+		     2			 ??	??
+		     3			 ??	??
+		     4			 ??	??
+		     5			 ??	??
+		     6			 ??	??
+		     7			 ??	??
+		     8			 00	40
+
+
+	COMPRESSION LIMITATIONS:
+		- IN COMPRESS MODE, CLIPPING OR SCALING ARE NOT ALLOWED
+

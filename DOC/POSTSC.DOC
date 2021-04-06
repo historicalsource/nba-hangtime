@@ -1,0 +1,26 @@
+  PPS Command Syntax:
+                         PPS [flags] filepattern ...                Defaults
+
+  Flags: -Hx    Print page headers.  x toggles options:                     
+                   -    - enables/disables printing of headers           yes
+                   F    - print Filename                                 yes
+                   P    - print file Path (directory)                     no
+                   N    - print page Number                              yes
+                   B    - draw a Border around the header                yes
+                   Gx   - set background Gray level to x (0.0-1.0)       1.0
+                   T"x" - set header Title string to x                     -
+         -M#   Set all margins to # inches                               0.5
+         -Mx#  Set margin x (T-top,B-bottom,L-left,R-right) to # inches     
+         -MI#  Set margin between page images to # inches               0.25
+         -W#   Set line width to # characters                               
+         -L#   Set page length to # lines                                 66
+         -Ox   Select page orientation (OP-Portrait or OL-Landscape)      OP
+         -I#   Page Images per printed sheet (reduced size)                1
+         -IA#  Page Images Across printed sheet (reduced size)             1
+         -ID#  Page Images Down printed sheet (reduced size)               1
+         -B    Draw a border around (N-None,P-Page image,S-Sheet)          P
+         -Fx   Select print font (C-Courier,H-Helvetica,T-Times-Roman)     C
+         -Tx   Set tab expansion to every x spaces                         8
+         -Xx   Process environment string PPS_DEFx                         -
+         -?    Show selected print options                                no
+         -Ddev Send output to device (or file) (to screen if -D only)    PRN

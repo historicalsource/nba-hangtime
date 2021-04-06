@@ -1,0 +1,120 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+	      Williams Electronics Z-Unit Video Software System
+	      -------------------------------------------------
+
+
+		       Loadimg image loading facility
+
+
+	     Copyright (c) 1988 Williams Electronics Games, Inc.
+			    All Rights Reserved
+
+			      Warren B. Davis
+
+
+
+Some questions people ask about LOADIMG...
+
+
+1)  WHAT IS IT?
+
+	LOADIMG is a program which takes image data out of any number of 
+	WIMP image libraries (.img files) and downloads them to good old
+	system Z image memory EXACTLY WHERE YOUR PROGRAM EXPECTS IT TO BE!!!
+	It can also generate source tables which you can link into your
+	program so it knows where to find each image. With the proper flag
+	settings, you can have LOADIMG perform either or both of these 
+	functions.
+
+
+2) SOUNDS PRETTY FUCKIN' AMAZING.  HOW DO YOU DO IT?
+
+	Well, frankly, it's magic.
+
+
+3) HOW DO I GET IT TO WORK FOR ME?
+
+	Follow these simple instructions. It's as easy as 1,2,3!
+
+	First, you must generate a .lod file for your game.  
+	This is simply a text file which contains names of WIMP image libraries
+	and the images within them which you wish to download. You can
+	create this file with a text editor or have WIMP generate it for you.
+	(See Note 1 for more details on this)
+
+	Second, invoke LOADIMG with the /t option. This creates six files
+	imgtbl.asm, imgpal.asm, imgtbl.glo, bgndtbl.asm, bgndpal.asm and
+	bgndtbl.glo.  All of the .asm files should be assembled and linked
+	with your program.  The .glo files should be included in any source
+	module which references these images.
+
+	Third, before you load your executable, you can invoke LOADIMG with
+	no flags. This actually goes into the WIMP .img files specified in your
+	.lod file and transfers the data to image RAM.
+
+
+3)	WHAT ABOUT WHEN MY IMAGES CHANGE?
+
+	If the sizes of the images remain the same and no images are
+	added or deleted, you need only redo step 3. If the sizes change,
+	but no images are added or deleted, you must redo steps 2 and 3.
+	To add or delete images, the .lod file must be edited and then
+	steps 2 and 3 repeated.
+
+
+
+4)  IT ALL SEEMS SO EASY! WHAT'S THE CATCH?
+
+	No catch! But if you want to risk getting confused, you can read on
+	to find out all the nasty details...
+
+     <NOTE 1>
+	The .lod file can have any filename. It can be in any directory.
+	However, you must set an environment variable SRCDIR to be the
+	directory where your .lod file can be found. When WIMP generates
+	a .lod file for you, it automatically places it in SRCDIR.
+	If SRCDIR is not defined, the directory you are currently in is
+	used. The .lod file created by WIMP is always called imgtbl.lod.
+	You can rename it if you like. You must manually edit a .lod file
+	to combine images from different WIMP .img files.
+
+     <NOTE 2>
+	The format for the .lod file is...
+	A fully qualified .img filename starting in column 1.
+	A series of lines starting with "---> " followed by as many
+	image names as will fit on a line separated by commas.
+	A line that starts with "BBB> " expects a list of Blimp
+	background files.
+
+     <NOTE 3> 
+	The files imgtbl.asm, imgpal.asm, imgtbl.glo, bgndtbl.asm,
+	bgndpal.asm and bgndtbl.glo are always created in the directory
+	which you are in when you invoke LOADIMG.
+
+     <NOTE 4> 
+	The invocation for LOADIMG is as follows...
+		
+		LOADIMG filename flags
+
+		where filename is the name of your .lod file (minus
+						a directory and extension)
+		and   flag can be  /t - generate tables only
+				   /b - generate tables and download images
+				   /n - do not detect duplicate data 
+				   /v - verbose mode, report lots of stuff
+
+				if omitted, images are downloaded only.
+
+

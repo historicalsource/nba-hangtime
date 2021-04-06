@@ -1,0 +1,7 @@
+	.DATA
+ULT	.set	0ffe78000h
+E_KAN	.set	0fff1ab50h
+E_SON	.set	0fff33130h
+E_JAX	.set	0fff5a790h
+	.TEXT
+
